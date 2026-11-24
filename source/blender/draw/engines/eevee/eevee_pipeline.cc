@@ -252,18 +252,21 @@ PassMain::Sub *ShadowPipeline::surface_material_add(blender::Material *material,
 
 void ShadowPipeline::render(View &view)
 {
-  /* Pass mode is a per-submission push constant. Writing it into the shared uniform buffer
-   * between two submissions races with the first submission on Vulkan/Metal, where the buffer
-   * may still be in flight. */
   shadow_pass_mode_ = ShadowPassMode::Depth;
-  render_ps_.push_constant("shadow_pass_mode", int(shadow_pass_mode_));
+  inst_.uniform_data.data.shadow.shadow_pass_mode = uint(shadow_pass_mode_);
+  inst_.uniform_data.data.push_update();
   inst_.manager->submit(render_ps_, view);
 
   if (inst_.shadows.shadow_id_enabled()) {
     /* The resolve pass must observe the final depth winner for every atlas texel. */
     GPU_memory_barrier(GPU_BARRIER_SHADER_IMAGE_ACCESS | GPU_BARRIER_TEXTURE_FETCH);
+    /* The pass mode lives in the shared shadow UBO, so the first submission must have finished
+     * reading it before we overwrite it for the resolve submission. This path is only taken when
+     * the optional shadow-ID sidecar is enabled. */
+    GPU_finish();
     shadow_pass_mode_ = ShadowPassMode::IdResolve;
-    render_ps_.push_constant("shadow_pass_mode", int(shadow_pass_mode_));
+    inst_.uniform_data.data.shadow.shadow_pass_mode = uint(shadow_pass_mode_);
+    inst_.uniform_data.data.push_update();
     inst_.manager->submit(render_ps_, view);
     inst_.shadows.shadow_id_resolve_submit_record();
   }
