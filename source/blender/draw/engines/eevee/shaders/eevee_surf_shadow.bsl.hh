@@ -50,6 +50,10 @@ struct SurfShadow {
   uimage2DArrayAtomic shadow_atlas_id_img;
   [[storage(SHADOW_ID_DIAGNOSTIC_BUF_SLOT, read_write)]]
   ShadowIdDiagnosticData &shadow_id_diagnostic;
+
+  /* Per-submission push constant so the depth and ID-resolve passes can share one draw list
+   * without racing on the uniform buffer. */
+  [[push_constant]] uint shadow_pass_mode;
 };
 
 [[fragment]] [[texture_atomic]]
@@ -60,8 +64,7 @@ void surf_shadow([[resource_table]] PipelineConstants &pipe,
                  [[resource_table]] const Sampling &sampling,
                  [[resource_table]] const UtilityTexture & /*util_tx*/,
                  [[front_facing]] const bool front_face,
-                 [[frag_coord]] const float4 frag_co,
-                 [[push_constant]] const uint shadow_pass_mode)
+                 [[frag_coord]] const float4 frag_co)
 {
   auto &shadow_iface = interface_get(eevee_shadow_iface_info, shadow_iface);
   auto &shadow_clip = interface_get(eevee_shadow_iface_info, shadow_clip);
@@ -124,7 +127,7 @@ void surf_shadow([[resource_table]] PipelineConstants &pipe,
    * This is equivalent of calling `next_after`, but without the safety. */
   u_depth += 2;
 
-  ShadowPassMode pass_mode = ShadowPassMode(shadow_pass_mode);
+  ShadowPassMode pass_mode = ShadowPassMode(srt.shadow_pass_mode);
   if (pass_mode == ShadowPassMode::Depth) {
     if (uni.uniform_buf.shadow.use_debug_cost) {
       imageAtomicAdd(srt.shadow_atlas_img, out_texel, 1u);
