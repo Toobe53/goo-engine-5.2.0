@@ -75,16 +75,17 @@ jobs:
           - name: linux-x64
             os: ubuntu-24.04
             libdir: linux_x64
-            # GNUmakefile appends `_release` to BUILD_DIR for the release target.
+            # `make ... BUILD_DIR=...` is a command-line override, so GNUmakefile
+            # does not append `_release`; the build tree is exactly build_dir.
             build_dir: build-linux-x64
-            out_dir: build-linux-x64_release
+            out_dir: build-linux-x64
             artifact: goo-engine-linux-x64
           - name: macos-arm64
             os: macos-15
             libdir: macos_arm64
-            # GNUmakefile appends `_release` to BUILD_DIR for the release target.
+            # Same command-line override rule as Linux: the build tree is build_dir.
             build_dir: build-macos-arm64
-            out_dir: build-macos-arm64_release
+            out_dir: build-macos-arm64
             artifact: goo-engine-macos-arm64
     steps:
       - name: Checkout source (submodules fetched later by make_update.py)
@@ -255,7 +256,7 @@ jobs:
       - name: Cache CMake configure results
         uses: actions/cache@v4
         with:
-          path: ${{ matrix.out_dir }}/CMakeCache.txt
+          path: ${{ matrix.build_dir }}/CMakeCache.txt
           key: cmake-${{ runner.os }}-${{ matrix.name }}-${{ hashFiles('CMakeLists.txt', 'build_files/cmake/**/*.cmake') }}-${{ env.CI_CACHE_EPOCH }}
           restore-keys: |
             cmake-${{ runner.os }}-${{ matrix.name }}-
@@ -362,11 +363,11 @@ jobs:
           set +e
           mkdir -p ci-logs
           for f in \
-            "${{ matrix.out_dir }}/CMakeFiles/CMakeOutput.log" \
-            "${{ matrix.out_dir }}/CMakeFiles/CMakeError.log" \
-            "${{ matrix.out_dir }}/CMakeFiles/CMakeConfigureLog.yaml" \
-            "${{ matrix.out_dir }}/CMakeCache.txt" \
-            "${{ matrix.out_dir }}/buildtime.txt"; do
+            "${{ matrix.build_dir }}/CMakeFiles/CMakeOutput.log" \
+            "${{ matrix.build_dir }}/CMakeFiles/CMakeError.log" \
+            "${{ matrix.build_dir }}/CMakeFiles/CMakeConfigureLog.yaml" \
+            "${{ matrix.build_dir }}/CMakeCache.txt" \
+            "${{ matrix.build_dir }}/buildtime.txt"; do
             if [ -f "$f" ]; then
               cp "$f" "ci-logs/$(basename "$f")"
             fi
@@ -380,9 +381,9 @@ jobs:
           name: logs-${{ matrix.name }}
           path: |
             ci-logs/**
-            ${{ matrix.out_dir }}/CMakeFiles/CMakeOutput.log
-            ${{ matrix.out_dir }}/CMakeFiles/CMakeError.log
-            ${{ matrix.out_dir }}/CMakeFiles/CMakeConfigureLog.yaml
+            ${{ matrix.build_dir }}/CMakeFiles/CMakeOutput.log
+            ${{ matrix.build_dir }}/CMakeFiles/CMakeError.log
+            ${{ matrix.build_dir }}/CMakeFiles/CMakeConfigureLog.yaml
           if-no-files-found: warn
           retention-days: 14
 
@@ -391,6 +392,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: ${{ matrix.out_dir }}/bin/**
+          path: ${{ matrix.build_dir }}/bin/**
           if-no-files-found: error
           retention-days: 7
