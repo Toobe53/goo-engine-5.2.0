@@ -100,6 +100,18 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Pull startup.blend from Git LFS
+        shell: bash
+        run: |
+          set -euo pipefail
+          # CMake refuses to configure if this LFS pointer was checked out
+          # unsmudged. Pull only the file the build actually validates instead of
+          # downloading every LFS asset in the repository.
+          git lfs pull --include="release/datafiles/startup.blend"
+          size="$(wc -c < release/datafiles/startup.blend)"
+          echo "startup.blend size: ${size} bytes"
+          test "${size}" -gt 1024
+
       - name: Install build dependencies (Linux)
         if: runner.os == 'Linux'
         shell: bash
