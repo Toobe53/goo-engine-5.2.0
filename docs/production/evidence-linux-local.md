@@ -111,7 +111,7 @@ Windows 对应行见 [evidence-windows-local.md](evidence-windows-local.md)。
 
 ## 仍未验证
 
-- 完整驱动矩阵：19 个环境中只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行
+- 完整驱动矩阵：Windows/Linux 15 行中只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行
   有真实硬件结果；其余仍是 descriptor。
-- 真实崩溃 dump 采集、Windows 签名、安装包/更新/回滚。
+- Linux 真实崩溃 dump/core 采集、Windows 签名、安装包/更新/回滚。
 - 这些证据补齐前，不应把分支标记为“稳定生产版”。

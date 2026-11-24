@@ -2,7 +2,8 @@
 
 本文档描述 Goo Engine 5.2 生产分支的崩溃监督原型 `tools/crashmon/`：它做什么、怎么用、采集什么、不采集什么，以及距离生产级崩溃遥测还差哪些东西。
 
-> 状态（2026-11）：这是一个**原型**。Windows 路径已在一台 Windows 11 + Blender 5.2.3 LTS 的机器上完成端到端自测（真实子进程、日志、manifest、report、dry-run 上传计划）。Linux 与 macOS 的采集代码已实现，但本交付中只通过注入/模拟的能力探测测试过，**没有在真实 Linux/macOS 主机上运行**；也没有制造过真实的原生崩溃 dump 来验证采集。不要把“代码路径存在”当成“该平台已验证”。
+> 状态（2026-11）：这是一个**原型**。Windows 路径已在一台 Windows 11 + Blender 5.2.3 LTS 的机器上完成端到端自测（真实子进程、日志、manifest、report、dry-run 上传计划），并已对一份**真实 Blender minidump** 完成发现、复制、SHA-256 与 report 校验（见
+> [`evidence/crashmon-windows-real/`](evidence/crashmon-windows-real/)）。但还没有用 `crashmon run` 监督一次真实原生崩溃，退出码来自 WER 事件而非 supervisor；也没有符号化。Linux 与 macOS 的采集代码已实现，但本交付中只通过注入/模拟的能力探测测试过，**没有在真实 Linux/macOS 主机上运行**。不要把“代码路径存在”当成“该平台已验证”。
 
 ## 1. 目标与非目标
 
@@ -307,17 +308,36 @@ python -m crashmon run --blender "C:\Program Files\Blender Foundation\Blender 5.
 
 实测 bundle 的要点：stdout 113 B，捕获到 `crashmon startup probe: 5.2.3 LTS` 与 Blender 版本行；stdout/stderr 的 SHA-256、tail、轮转信息齐全；basic 脱敏替换 6 处（家目录 → `<HOME>`）；环境白名单存在 4 个变量、排除 62 个；Windows 平台段记录 `CrashDumps` 存在/可读、LocalDumps 未配置（`enabled_hint: false`）、系统 WER 目录存在、`WerFault.exe` 存在；`upload-plan.json` 中 `token=demo-secret` 被替换为 `<redacted>`，且 `network_performed: false`。
 
+### 真实崩溃 dump 采集（2026-11-24，Windows）
+
+`crashmon collect` 处理了真实文件
+`C:\Users\zbq\AppData\Local\CrashDumps\blender.exe.11652.dmp`（135,681,994 B，
+`MDMP` 头，SHA-256 `8b1580476ab1e153cbe3a5efdd1050df5c90aba81245052c296cc99386be7452`）。
+WER Application Error 记录：`blender.exe` 5.2.1.0、`tbbmalloc.dll`、`0xC0000005`、
+偏移 `0x6829`。采集结果：
+
+- `Verdict: CRASH`，发现 5 个候选产物、复制 1 个，schema 校验 0 问题。
+- 真实 dump 被复制到 bundle 的 `crash/`，manifest 记录 129.4 MiB 与 SHA-256。
+- 同目录另外 2 个 Blender dump 和 2 个 110 KiB WER 报告被识别，但因
+  `--max-artifacts 1` 未复制。
+- 退出码由 WER 事件人工提供，**不是 supervisor 观察到的退出码**；报告 Notes 明确记录。
+
+证据：`manifest.json`、`report.md` 和来源说明在
+[`evidence/crashmon-windows-real/`](evidence/crashmon-windows-real/)。129.4 MiB 的 dump
+本身未提交，只保留在忽略的 `_work/` 中。
+
 ### 明确未验证
 
 | 项 | 原因 / 影响 |
 | --- | --- |
 | 真实 Linux 主机上的 coredumpctl/core_pattern/ulimit 采集 | 只在 Windows 上以注入的 `which_func`/`runner`/reader 测试；未验证发行版差异、权限、systemd-coredump |
 | 真实 macOS DiagnosticReports 解析 | 未在 macOS 上运行；`.ips` 首行 JSON 与 `.crash` 的格式随版本变化，匹配可能漏报 |
-| 真实崩溃 dump 的发现/复制/哈希 | 自测只验证了日志与空产物来源；没有制造 Blender 原生崩溃 |
+| `crashmon run` 监督真实原生崩溃 | 已采集真实 dump，但退出码来自 WER 事件；没有让 supervisor 直接观察崩溃 |
+| dump 符号化/调用栈重建 | 没有 PDB/build ID 匹配；只能保留原始 minidump |
 | `coredumpctl dump` 实际提取 | 未在 Linux 实机执行；polkit/权限行为未知 |
-| Windows `Report.wer` 真实报告解析 | 只测了代码路径与目录扫描；没有真实 WER 报告样本 |
+| Windows `Report.wer` 真实报告解析 | 已发现真实 WER 报告并记录大小，但本次未复制/解析其内容 |
 | GPU 探测在 Linux/macOS 的完整性 | Windows 实测可用；其他平台仅代码路径 |
-| 生产上传/符号化 | 按设计未实现 |
+| 生产上传 | 按设计未实现，只有 dry-run 计划 |
 
 ## 12. 测试覆盖与维护
 

@@ -112,7 +112,7 @@ def dedupe_artifacts(artifacts: list) -> list:
     return sorted(by_name.values(), key=lambda item: item["name"])
 
 
-def load_driver_requirements(matrix_path: Path, warnings: list) -> list:
+def load_driver_requirements(matrix_path: Path, warnings: list, platforms: set[str] | None = None) -> list:
     if not matrix_path:
         return []
     if not matrix_path.is_file():
@@ -141,6 +141,8 @@ def load_driver_requirements(matrix_path: Path, warnings: list) -> list:
         except (KeyError, AttributeError, TypeError):
             entry_id = entry.get("id") if isinstance(entry, dict) else None
             warnings.append("skipping malformed driver matrix entry: %r" % entry_id)
+            continue
+        if platforms and os_info.get("family") not in platforms:
             continue
         if key in seen:
             continue
@@ -200,45 +202,61 @@ def load_dependencies(path: Path | None, declared: list, warnings: list) -> list
     return dependencies
 
 
-def signing_block(args) -> dict:
+def signing_block(args, platforms: set[str] | None = None) -> dict:
+    selected = platforms or {"windows", "macos"}
     windows_signed = bool(args.windows_signed)
     macos_signed = bool(args.macos_signed)
-    platforms = {}
-    if windows_signed:
-        platforms["windows"] = {
-            "tool": "signtool",
-            "status": "signed",
-            "identity": os.environ.get("GOO_WIN_CERT_SUBJECT") or "unknown",
-        }
-    else:
-        platforms["windows"] = {
-            "tool": "signtool",
+    entries = {}
+    if "windows" in selected:
+        if windows_signed:
+            entries["windows"] = {
+                "tool": "signtool",
+                "status": "signed",
+                "identity": os.environ.get("GOO_WIN_CERT_SUBJECT") or "unknown",
+            }
+        else:
+            entries["windows"] = {
+                "tool": "signtool",
+                "status": "not-run",
+                "note": "placeholder; run tools/release/sign_windows.ps1 before hashing",
+            }
+    if "linux" in selected:
+        entries["linux"] = {
+            "tool": "gpg",
             "status": "not-run",
-            "note": "placeholder; run tools/release/sign_windows.ps1 before hashing",
+            "note": "Linux archives are not code-signed; publish SHA256SUMS and a detached GPG signature",
         }
-    if macos_signed:
-        platforms["macos"] = {
-            "tool": "codesign",
-            "status": "signed",
-            "identity": os.environ.get("GOO_MAC_SIGN_IDENTITY") or "unknown",
-        }
-    else:
-        platforms["macos"] = {
-            "tool": "codesign",
-            "status": "not-run",
-            "note": "placeholder; run tools/release/sign_macos.sh before hashing",
-        }
-    statuses = {item["status"] for item in platforms.values()}
+    if "macos" in selected:
+        if macos_signed:
+            entries["macos"] = {
+                "tool": "codesign",
+                "status": "signed",
+                "identity": os.environ.get("GOO_MAC_SIGN_IDENTITY") or "unknown",
+            }
+        else:
+            entries["macos"] = {
+                "tool": "codesign",
+                "status": "not-run",
+                "note": "placeholder; run tools/release/sign_macos.sh before hashing",
+            }
+    statuses = {item["status"] for item in entries.values()}
     if statuses == {"signed"}:
         overall = "signed"
     elif "signed" in statuses:
         overall = "partial"
     else:
         overall = "unsigned-placeholder"
-    return {"status": overall, "platforms": platforms}
+    return {"status": overall, "platforms": entries}
 
 
-def build_manifest(args, artifacts: list, checksums_name: str, driver_requirements: list, dependencies: list) -> tuple[dict, list]:
+def build_manifest(
+    args,
+    artifacts: list,
+    checksums_name: str,
+    driver_requirements: list,
+    dependencies: list,
+    platforms: set[str] | None = None,
+) -> tuple[dict, list]:
     warnings = []
     project = {
         "name": args.name,
@@ -268,6 +286,7 @@ def build_manifest(args, artifacts: list, checksums_name: str, driver_requiremen
             "arch": platform.machine(),
             "python": platform.python_version(),
             "builder": builder,
+            "platforms": sorted(platforms or {"windows", "macos"}),
         },
         "artifacts": artifacts,
         "checksums": {
@@ -277,7 +296,7 @@ def build_manifest(args, artifacts: list, checksums_name: str, driver_requiremen
         },
         "dependencies": dependencies,
         "driver_requirements": driver_requirements,
-        "signing": signing_block(args),
+        "signing": signing_block(args, platforms),
         "limitations": [
             "A complete driver matrix requires the self-hosted GPU lab documented in docs/production/driver-matrix.md.",
             "Unsupported GPU/driver combinations are not covered by this release manifest.",
@@ -349,6 +368,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dependency", action="append", default=[], metavar="NAME=VERSION", help="Declared dependency (repeatable).")
     parser.add_argument("--dependencies-file", help="Optional JSON list of dependencies.")
     parser.add_argument("--driver-matrix", default=str(DEFAULT_MATRIX), help="Driver matrix used for driver_requirements (empty string disables).")
+    parser.add_argument(
+        "--platform",
+        action="append",
+        choices=["windows", "linux", "macos"],
+        default=[],
+        help="Restrict manifest requirements/signing to this platform (repeatable; empty includes windows and macos).",
+    )
     parser.add_argument("--windows-signed", action="store_true", help="Assert Windows artifacts were already signed.")
     parser.add_argument("--macos-signed", action="store_true", help="Assert macOS artifacts were already signed/notarized.")
     parser.add_argument("--apply", action="store_true", help="Actually write the bundle (default is dry-run).")
@@ -367,6 +393,7 @@ def main(argv=None) -> int:
         return 2
     out_dir = Path(args.out).expanduser() if args.out else REPO_ROOT / "dist" / ("%s-%s" % (args.name.replace(" ", "-").lower(), args.version))
     matrix_path = Path(args.driver_matrix).expanduser() if args.driver_matrix else None
+    platforms = set(args.platform) or None
 
     warnings = []
     try:
@@ -378,7 +405,7 @@ def main(argv=None) -> int:
             return 2
         for artifact in artifacts:
             artifact["sha256"] = sha256_file(artifact["source"])
-        driver_requirements = load_driver_requirements(matrix_path, warnings) if matrix_path else []
+        driver_requirements = load_driver_requirements(matrix_path, warnings, platforms) if matrix_path else []
         dependencies = load_dependencies(
             Path(args.dependencies_file).expanduser() if args.dependencies_file else None,
             args.dependency,
@@ -393,7 +420,9 @@ def main(argv=None) -> int:
         {"path": artifact["name"], "size": artifact["size"], "sha256": artifact["sha256"]}
         for artifact in artifacts
     ]
-    manifest, manifest_warnings = build_manifest(args, public_artifacts, "SHA256SUMS", driver_requirements, dependencies)
+    manifest, manifest_warnings = build_manifest(
+        args, public_artifacts, "SHA256SUMS", driver_requirements, dependencies, platforms
+    )
     warnings.extend(manifest_warnings)
     manifest["warnings"] = warnings
 

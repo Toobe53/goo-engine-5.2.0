@@ -100,3 +100,4 @@ blendcache_*
 /goo_test_output/
 /_verify/
 /_install-windows*/
+/dist/

@@ -191,7 +191,8 @@ def check_signing(manifest: dict, result: Result, require_signed: bool) -> None:
         result.fail("signing.required", "signing status is %r; signed artifacts are required" % status)
     else:
         result.warn("signing.status", "signing status is %r (placeholder); use --require-signed to enforce" % status)
-    for name in ("windows", "macos"):
+    declared = (manifest.get("build") or {}).get("platforms") or ["windows", "macos"]
+    for name in declared:
         item = platforms.get(name)
         if not isinstance(item, dict) or not item.get("status"):
             result.warn("signing.platform.%s" % name, "missing signing placeholder for %s" % name)

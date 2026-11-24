@@ -2,7 +2,7 @@
 
 本文档描述 Goo Engine 5.2 生产分支的发布打包、校验和签名流程。目标是：**默认安全、可重复、哈希覆盖最终字节**。
 
-> 状态（2026-11）：脚本与流程骨架已落地，并在 Windows 上用合成产物跑通 dry-run / `--apply` / 校验/ 篡改检测。**没有真实代码签名证书、没有在 macOS 上执行 codesign/notarytool、没有用真实 Goo 构建产物验证。** 签名与公证相关命令必须由持有密钥的发布负责人在真实环境复核。
+> 状态（2026-11）：Windows/Linux 真实构建产物已跑通 `build_release.py --apply` → `SHA256SUMS` → `release-manifest.json` → `verify_release.py`（PASS，仅 unsigned 占位 warning）。Windows zip 与 Linux tar 都做了两次独立重建且 SHA-256 相同；Linux tar 使用 `--sort=name`、固定 `--mtime`、`--owner=0 --group=0 --numeric-owner` 与 `gzip -n`。**仍未持有真实代码签名证书，未对 Linux 包做 GPG 签名；macOS 不在本次 5.2.1 发布范围。** 签名/公证命令必须由持有密钥的发布负责人在真实环境复核。
 
 ## 1. 原则
 
@@ -51,15 +51,17 @@ verify_release.py
 ```bash
 # 只看计划（默认即 dry-run）
 python tools/release/build_release.py --version 5.2.0 --channel rc \
-  --artifacts dist/staging/windows --artifacts dist/staging/linux --artifacts dist/staging/macos
+  --artifacts dist/staging/windows --artifacts dist/staging/linux \
+  --platform windows --platform linux
 
 # 真正生成发布目录
 python tools/release/build_release.py --version 5.2.0 --channel production \
-  --artifacts dist/staging/windows --artifacts dist/staging/linux --artifacts dist/staging/macos \
+  --artifacts dist/staging/windows --artifacts dist/staging/linux \
+  --platform windows --platform linux \
   --commit "$GITHUB_SHA" --build-id "$GITHUB_RUN_ID" --apply
 
 # 声明签名状态（仅记录，不执行签名）
-python tools/release/build_release.py --version 5.2.0 --windows-signed --macos-signed --apply ...
+python tools/release/build_release.py --version 5.2.0 --windows-signed --apply ...
 ```
 
 常用参数：
@@ -78,6 +80,7 @@ python tools/release/build_release.py --version 5.2.0 --windows-signed --macos-s
 | `--dependency NAME=VERSION` | 可重复 | 声明依赖 |
 | `--dependencies-file JSON` | 无 | JSON 列表形式的依赖 |
 | `--driver-matrix PATH` | `tools/driver_matrix/matrix.json` | 从矩阵提取驱动要求；传空串禁用 |
+| `--platform {windows,linux,macos}` | 空（windows+macos） | 可重复；过滤 driver requirements 与 signing 占位。Windows/Linux 发布应显式传入两项 |
 | `--windows-signed` / `--macos-signed` | 否 | 声明对应平台已签（仅写入 manifest） |
 | `--apply` | 否 | 真正写文件；`--dry-run` 可强制回 dry-run |
 
@@ -99,7 +102,7 @@ f548f2a2...  goo-5.2.0-linux-x64.tar.gz
 | `schema_version` | manifest 结构版本，当前 `1.0` |
 | `project` | `name`、`version`、`channel` |
 | `source` | `commit`、`commit_short`、`branch` |
-| `build` | `id`、`timestamp`、`host`、`platform`、`arch`、`python`、`builder` |
+| `build` | `id`、`timestamp`、`host`、`platform`、`arch`、`python`、`builder`、`platforms` |
 | `artifacts[]` | `path`、`size`、`sha256` |
 | `checksums` | `algorithm: sha256`、`file: SHA256SUMS`、`count` |
 | `dependencies` | 名称到版本的映射 |
@@ -115,6 +118,47 @@ f548f2a2...  goo-5.2.0-linux-x64.tar.gz
 - `0`：成功（dry-run 也算成功）。
 - `1`：写文件失败、复制后哈希不一致等。
 - `2`：参数错误、产物目录不存在、扫描/重名冲突等。驱动矩阵缺失或不可读只记为 warning，`driver_requirements` 为空，不改变退出码。
+
+### 4.4 真实 5.2.1 本地发布包
+
+2026-11-25 在本机生成并验证了双平台 bundle（未签名）：
+
+| 产物 | 大小 | SHA-256 |
+| --- | ---: | --- |
+| `goo-engine-5.2.1-windows-x64.zip` | 273,726,768 B | `8fea6e94b39aefd37f82f3f193771cf182f94106be8d109eaf0229621ffb93ec` |
+| `goo-engine-5.2.1-linux-x64.tar.gz` | 335,439,115 B | `bf3790719df9926bcaf5364a17053a1fa31c6ce36975181ddd2c58836f2c5a60` |
+
+命令（Windows 本机，Python 3.12）：
+
+```powershell
+python tools/release/build_release.py --version 5.2.1 --name "Goo Engine" `
+  --channel production --artifacts _work/release-staging `
+  --out dist/goo-engine-5.2.1 --commit 7f76f1ef --branch production/5.2 `
+  --build-id local-20261125 --builder zbq `
+  --platform windows --platform linux --apply
+python tools/release/verify_release.py --release-dir dist/goo-engine-5.2.1
+```
+
+结果：`verification: PASS`，2 个 artifact 的 size/SHA-256 与 `SHA256SUMS`、
+`release-manifest.json` 一致；唯一 warning 是 `signing.status=unsigned-placeholder`。
+本次 bundle 的校验材料保留在
+[`evidence/release-goo-engine-5.2.1-local/`](evidence/release-goo-engine-5.2.1-local/README.md)。
+
+Windows zip 用标准库 `zipfile` 以固定时间戳 `2026-11-25 00:00:00`、排序文件名、
+固定权限重建两次，SHA-256 均为
+`8fea6e94b39aefd37f82f3f193771cf182f94106be8d109eaf0229621ffb93ec`。
+
+Linux tar 使用 `--mtime='2026-11-24 00:00:00 UTC'` 重新打包，避免解压时出现
+“时间戳在将来”警告；在 Debian 13 / GTX 1660 上解压后不设置 `LD_LIBRARY_PATH`：
+
+- `./blender --version` → `Blender 5.2.1 LTS`，`ldd ./blender` 无 `not found`；
+- 13 个 Goo 节点全部创建成功（`GOO_NODES_OK 13`）；
+- EEVEE 64×64 渲染 PNG 3,935 B，`check_shadow_id` 后 PNG 3,935 B，退出码 0；
+- 像素 SHA-256：普通渲染 `0154c30ab4cba0c68078fb415d0d36ea92c83f2f51965da17c6a28a35057cb4e`，
+  shadow-ID 渲染 `db92a5cdd5521d8928fb0b0919d5ebd82223bf86cb2082f524a84d28e99c728a`。
+
+随后在远端用完全相同的 `tar`/`gzip` 参数第二次重建，SHA-256 仍为
+`bf3790719df9926bcaf5364a17053a1fa31c6ce36975181ddd2c58836f2c5a60`（`REPRO_EXIT=0`）。
 
 ## 5. Windows 签名 `sign_windows.ps1`
 
@@ -151,6 +195,8 @@ pwsh -File tools/release/sign_windows.ps1 -ArtifactsDir dist\5.2.0 -Execute
 注意：`signtool` 需要 Windows SDK；脚本不会自动安装。证书密码用环境变量传递，CI 中应使用 secret，不要写进命令行历史。
 
 ## 6. macOS 签名与公证 `sign_macos.sh`
+
+> macOS 不在本次 5.2.1 本地发布范围；本节保留给未来恢复 macOS 支持时使用，相关命令未在真实 macOS 上验证。
 
 默认 **dry-run**；必须在 macOS 上执行真实签名。
 
@@ -219,7 +265,7 @@ python tools/release/verify_release.py --release-dir dist/5.2.0 --check-signatur
 ## 8. 发布检查清单
 
 1. 版本号、channel、目标 commit 已确认。
-2. 各平台产物齐全，Windows/macOS 已按策略签名；签名在打包前完成。
+2. Windows/Linux 产物齐全；Windows 已按策略签名，Linux 已发布 SHA-256 与（可选）GPG 签名。macOS 不在 5.2.1 范围。
 3. `build_release.py` 先 dry-run，检查产物列表、哈希、driver requirements 数量。
 4. `--apply` 生成 `dist/<name>-<version>/`。
 5. `verify_release.py` 通过；需要签名证据时加 `--require-signed`，有平台工具时加 `--check-signatures`。
@@ -235,8 +281,10 @@ python tools/release/verify_release.py --release-dir dist/5.2.0 --check-signatur
 
 - 未持有真实 Windows 代码签名证书，未执行 `sign_windows.ps1 -Execute`；仅验证了 dry-run、缺少 signtool 时退出 `2`、以及 fake 二进制的命令打印。
 - 未在 macOS 上执行 `sign_macos.sh`；仅在 Windows 的 Git Bash 下做了 `bash -n` 语法检查与 dry-run，`--execute` 因非 macOS 正确退出 `2`。codesign/notarytool/stapler 的真实调用未验证。
-- 未用真实 Goo 产物验证 `build_release.py`；测试使用临时合成文件，验证了 dry-run 不写盘、`--apply` 写出 SHA256SUMS/manifest、复制后哈希比对、`verify_release.py` 通过/篡改失败/`--require-signed` 失败/缺失 manifest 退出 `2`。
+- 已用真实 Windows/Linux 5.2.1 产物生成并校验 bundle；仍未用真实**已签名**产物验证签名路径。
 - 未验证 `--check-signatures` 对真实已签二进制的结果（本机无 signtool、无已签样本）。
+- Linux tar 与 Windows zip 都已做两次独立重建同 SHA 验证；Linux 第二次重建在远端完成。
+- 未在真实 Windows 已签名二进制上验证签名路径；未做安装包/更新/回滚实测。
 - `driver-matrix.yml.example` 未在 GitHub Actions 实际启用。
 
 ## 11. 责任人（占位）

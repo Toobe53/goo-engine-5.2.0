@@ -1,0 +1,315 @@
+{
+  "schema_version": "crashmon.bundle/1",
+  "tool": {
+    "name": "crashmon",
+    "version": "0.1.0",
+    "prototype": true,
+    "python": "3.12.14",
+    "executable": "<HOME>\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe"
+  },
+  "bundle": {
+    "id": "crashmon-collect-20261124T175656Z-14f9c2",
+    "kind": "collect",
+    "created_utc": "2026-11-24T17:56:56Z",
+    "created_local": "2026-11-25T01:56:56+08:00",
+    "timezone": "中国标准时间",
+    "manifest_path": "manifest.json"
+  },
+  "privacy": {
+    "level": "basic",
+    "raw_logs_included": false,
+    "environment_scope": "allowlist",
+    "network": "disabled",
+    "redaction": {
+      "level": "basic",
+      "applied": true,
+      "replacements": 9,
+      "placeholders": [
+        "<HOME>"
+      ]
+    },
+    "notes": [
+      "Text logs and text crash reports are redacted at capture time.",
+      "Binary dumps/cores are copied verbatim; redaction cannot reach inside process memory.",
+      "The full environment is never captured; only allowlisted keys are stored.",
+      "Nothing is uploaded by this prototype."
+    ]
+  },
+  "run": {
+    "started_utc": null,
+    "ended_utc": "2026-11-24T17:56:56Z",
+    "duration_s": null,
+    "timeout_seconds": null,
+    "timed_out": false,
+    "command": [
+      "<collected>"
+    ],
+    "cwd": null,
+    "exit": {
+      "raw": 3221225477,
+      "code_hex": "0xC0000005",
+      "signal": null,
+      "signal_name": null,
+      "windows_exception": {
+        "code_hex": "0xC0000005",
+        "name": "ACCESS_VIOLATION"
+      },
+      "category": "crash",
+      "description": "Windows status 0xC0000005 (ACCESS_VIOLATION)",
+      "timed_out": false
+    },
+    "logs": [],
+    "spawn_error": null,
+    "source": "collect"
+  },
+  "system": {
+    "os": {
+      "name": "Windows",
+      "release": "11",
+      "version": "10.0.26200",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "windows_release": "11",
+      "windows_version": "10.0.26200",
+      "service_pack": "SP0"
+    },
+    "arch": "AMD64",
+    "node_arch": "AMD64",
+    "cpu": {
+      "logical_cores": 16,
+      "model": "12th Gen Intel(R) Core(TM) i5-12500H"
+    },
+    "memory": {
+      "total_bytes": 16781717504,
+      "source": "GlobalMemoryStatusEx"
+    },
+    "python": {
+      "version": "3.12.14",
+      "version_full": "3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "<HOME>\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe",
+      "implementation": "cpython"
+    },
+    "errors": []
+  },
+  "gpu": {
+    "probe_system": "Windows",
+    "method": "powershell-cim",
+    "adapters": [
+      {
+        "name": "OrayIddDriver Device",
+        "driver_version": "17.50.19.949",
+        "adapter_ram_bytes": null,
+        "source": "Win32_VideoController"
+      },
+      {
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "driver_version": "31.0.101.5590",
+        "adapter_ram_bytes": 2147479552,
+        "source": "Win32_VideoController"
+      }
+    ],
+    "opengl": {},
+    "drm_devices": [],
+    "notes": [],
+    "errors": []
+  },
+  "blender": {
+    "path": null,
+    "error": "no Blender executable supplied"
+  },
+  "environment": {
+    "scope": "allowlist",
+    "considered_keys": [
+      "BLENDER_USER_CONFIG",
+      "BLENDER_USER_SCRIPTS",
+      "BLENDER_USER_EXTENSIONS",
+      "BLENDER_SYSTEM_SCRIPTS",
+      "BLENDER_SYSTEM_PYTHON",
+      "BLENDER_VERBOSE",
+      "CUDA_VISIBLE_DEVICES",
+      "HIP_VISIBLE_DEVICES",
+      "ROCR_VISIBLE_DEVICES",
+      "METAL_DEVICE_WRAPPER_TYPE",
+      "VK_ICD_FILENAMES",
+      "VK_LOADER_DEBUG",
+      "OCIO",
+      "DISPLAY",
+      "WAYLAND_DISPLAY",
+      "XDG_SESSION_TYPE",
+      "LANG",
+      "LC_ALL",
+      "TMPDIR",
+      "TEMP",
+      "TMP",
+      "PYTHONPATH",
+      "PYTHONHOME",
+      "LD_LIBRARY_PATH",
+      "DYLD_LIBRARY_PATH",
+      "PROCESSOR_ARCHITECTURE",
+      "OS"
+    ],
+    "values": {
+      "TEMP": "<HOME>\\AppData\\Local\\Temp",
+      "TMP": "<HOME>\\AppData\\Local\\Temp",
+      "PROCESSOR_ARCHITECTURE": "AMD64",
+      "OS": "Windows_NT"
+    },
+    "present_count": 4,
+    "excluded_key_count": 58,
+    "note": "Only the allowlisted keys above are stored; the full environment is never captured."
+  },
+  "logs": [],
+  "crash_artifacts": [
+    {
+      "source": "user-crash-dir",
+      "kind": "minidump",
+      "original_path": "_work\\crashmon-input\\blender.exe.11652.dmp",
+      "relative_path": "crash/user-crash-dir-blender.exe.11652.dmp",
+      "copied": true,
+      "size_bytes": 135681994,
+      "sha256": "8b1580476ab1e153cbe3a5efdd1050df5c90aba81245052c296cc99386be7452",
+      "original_sha256": null,
+      "mtime_utc": "2026-11-24T10:34:56Z",
+      "text_redacted": false,
+      "note": "User-supplied crash directory. Binary artifact copied verbatim; contents are not redactable."
+    },
+    {
+      "source": "windows-crashdumps",
+      "kind": "minidump",
+      "original_path": "<HOME>\\AppData\\Local\\CrashDumps\\blender.exe.11652.dmp",
+      "relative_path": null,
+      "copied": false,
+      "size_bytes": 135681994,
+      "sha256": null,
+      "original_sha256": null,
+      "mtime_utc": "2026-11-24T10:34:56Z",
+      "text_redacted": false,
+      "note": "Skipped: --max-artifacts (1) reached."
+    },
+    {
+      "source": "windows-crashdumps",
+      "kind": "minidump",
+      "original_path": "<HOME>\\AppData\\Local\\CrashDumps\\blender.exe.3564.dmp",
+      "relative_path": null,
+      "copied": false,
+      "size_bytes": 134808938,
+      "sha256": null,
+      "original_sha256": null,
+      "mtime_utc": "2026-11-24T10:34:47Z",
+      "text_redacted": false,
+      "note": "Skipped: --max-artifacts (1) reached."
+    },
+    {
+      "source": "windows-wer",
+      "kind": "wer-report",
+      "original_path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive\\AppCrash_blender.exe_49912ffcb1bb6383d7ceac67299af9746b3e56f_0a776f45_0b3c8fb5-e806-42ad-8a53-b43fe9edb79e\\Report.wer",
+      "relative_path": null,
+      "copied": false,
+      "size_bytes": 112726,
+      "sha256": null,
+      "original_sha256": null,
+      "mtime_utc": "2026-11-24T10:34:55Z",
+      "text_redacted": false,
+      "note": "Skipped: --max-artifacts (1) reached."
+    },
+    {
+      "source": "windows-wer",
+      "kind": "wer-report",
+      "original_path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive\\AppCrash_blender.exe_49912ffcb1bb6383d7ceac67299af9746b3e56f_0a776f45_8d7b239c-f960-4ac7-b0d3-619d1f74afc9\\Report.wer",
+      "relative_path": null,
+      "copied": false,
+      "size_bytes": 112726,
+      "sha256": null,
+      "original_sha256": null,
+      "mtime_utc": "2026-11-24T10:34:46Z",
+      "text_redacted": false,
+      "note": "Skipped: --max-artifacts (1) reached."
+    }
+  ],
+  "platform": {
+    "system": "Windows",
+    "windows": {
+      "supported": true,
+      "crashdumps": {
+        "path": "<HOME>\\AppData\\Local\\CrashDumps",
+        "exists": true,
+        "readable": true,
+        "recent_matching_files": 2
+      },
+      "localdumps_registry": {
+        "supported": true,
+        "entries": [
+          {
+            "root": "HKLM",
+            "key": "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps",
+            "values": {}
+          }
+        ],
+        "enabled_hint": false,
+        "notes": [
+          "LocalDumps values are reported read-only; crashmon never creates or modifies them."
+        ],
+        "errors": []
+      },
+      "wer_dirs": [
+        {
+          "label": "local-ReportArchive",
+          "path": "<HOME>\\AppData\\Local\\Microsoft\\Windows\\WER\\ReportArchive",
+          "exists": false,
+          "readable": false
+        },
+        {
+          "label": "local-ReportQueue",
+          "path": "<HOME>\\AppData\\Local\\Microsoft\\Windows\\WER\\ReportQueue",
+          "exists": false,
+          "readable": false
+        },
+        {
+          "label": "system-ReportArchive",
+          "path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive",
+          "exists": true,
+          "readable": true
+        },
+        {
+          "label": "system-ReportQueue",
+          "path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportQueue",
+          "exists": true,
+          "readable": true
+        }
+      ],
+      "werfault": {
+        "path": "C:\\WINDOWS\\System32\\WerFault.exe",
+        "exists": true
+      },
+      "available": true,
+      "notes": [
+        "Windows local dumps require WER LocalDumps configuration or a WER report; a missing dump is not evidence that no crash occurred.",
+        "Crashmon reads WER configuration and directories but never changes them."
+      ],
+      "errors": []
+    }
+  },
+  "upload": {
+    "requested": false,
+    "consent": false,
+    "mode": "disabled",
+    "status": "not-requested",
+    "network_performed": false,
+    "target": null,
+    "file_count": 0,
+    "total_bytes": 0,
+    "plan_file": null,
+    "boundary": "Uploads are disabled by default. This prototype never opens a network socket; even with --upload-url and --consent it writes only a dry-run upload-plan.json."
+  },
+  "limitations": [
+    "The supervisor observes the direct Blender child process only. Crashes in detached child processes, GPU hang/TDR events, or machine-wide failures may not appear in the bundle.",
+    "A missing crash artifact is not proof that no crash occurred. OS dump policy, permissions, and reporting latency can suppress or delay artifacts.",
+    "Minidumps and cores are not symbolized. Reconstructing stacks needs matching debug symbols (PDB/DWARF) and the exact build ID/commit of the Blender binary.",
+    "Windows WER/LocalDumps does not write local dumps by default; Linux cores depend on core_pattern, ulimit, systemd-coredump/apport, and container permissions; macOS crash reports are written asynchronously.",
+    "Binary dumps/cores are copied verbatim and may contain process memory, paths, and user data. Redaction only covers text logs and text crash reports.",
+    "This prototype never performs network I/O and has no upload backend. A production system needs Crashpad/Sentry/Breakpad, a symbol server, retention controls, and an authenticated intake service.",
+    "Exit codes are interpreted with best-effort platform mappings; shell wrappers may translate signals into 128+N exit codes that cannot be distinguished from ordinary exit statuses."
+  ],
+  "notes": [
+    "Exit status supplied manually via --exit-code-hex; it was not observed by the supervisor."
+  ]
+}

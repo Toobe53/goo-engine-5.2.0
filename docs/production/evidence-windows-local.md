@@ -115,9 +115,9 @@ ctest --test-dir build-windows-lite -L goo --output-on-failure -j 1
 
 ## 仍未验证
 
-- 驱动矩阵 19 个环境中只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行有真实
+- Windows/Linux 15 行中只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行有真实
   硬件结果；其余仍是 descriptor，不能声称“完整矩阵已覆盖”。
-- 真实崩溃 dump 采集与符号化；Windows 代码签名；安装包、自动更新与回滚。
+- 真实崩溃 dump 的 `crashmon run` supervisor 采集与符号化；Windows 代码签名；安装包、自动更新与回滚。
 - Cycles、USD、Alembic、OpenVDB、MaterialX、XR 在当前 lite 构建中关闭，未做功能
   回归。
 - macOS 按用户要求不再纳入验收。

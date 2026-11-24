@@ -1,0 +1,10 @@
+pass    manifest.version             5.2.1
+pass    manifest.commit              7f76f1ef
+pass    manifest.build_id            local-20261125
+pass    checksums.coverage           2 artifact(s)
+pass    manifest.checksum_count      2
+pass    artifact.goo-engine-5.2.1-linux-x64.tar.gz size and sha256 match
+pass    artifact.goo-engine-5.2.1-windows-x64.zip size and sha256 match
+warning signing.status               signing status is 'unsigned-placeholder' (placeholder); use --require-signed to enforce
+
+verification: PASS (0 failure(s), 1 warning(s))

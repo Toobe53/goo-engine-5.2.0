@@ -80,12 +80,17 @@ and release-engineering scaffolding. It is intentionally honest about evidence:
   `cmake --install`, installed `blender.exe --version` = 5.2.1 LTS), 13 Goo nodes,
   EEVEE 64x64 and shadow-ID renders, and `ctest -L goo` 8 tests (7 pass, 1 skip);
   Debian 13 + GTX 1660 local release build (`7450/7450` targets), the same runtime
-  checks and Goo tests; a real 4/4 driver-matrix pass on each of those two hosts.
-- **Not yet verified:** the remaining 17 driver-matrix rows, real crash dumps,
-  Windows signing, or installer/update/rollback. macOS is out of scope by request.
+  checks and Goo tests; a real 4/4 driver-matrix pass on each of those two hosts;
+  a real Windows minidump preserved and hashed by `crashmon`; and a real
+  Windows/Linux release bundle whose `SHA256SUMS` and `release-manifest.json`
+  pass `verify_release.py`.
+- **Not yet verified:** the remaining 13 Windows/Linux driver-matrix rows, Windows
+  code signing, Linux GPG signing, installer/update/rollback, or crash-dump
+  symbolization. macOS is out of scope by request.
 - Exact runs, test counts and remaining gaps:
   [Windows evidence](docs/production/evidence-windows-local.md),
-  [Linux evidence](docs/production/evidence-linux-local.md) and
+  [Linux evidence](docs/production/evidence-linux-local.md),
+  [crash evidence](docs/production/evidence/crashmon-windows-real/README.md) and
   [CI evidence](docs/production/evidence.md).
 
 See [docs/production/README.md](docs/production/README.md) for the index and exact
