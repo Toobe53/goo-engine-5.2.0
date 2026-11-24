@@ -19,12 +19,6 @@ name: production-build
 on:
   # Manual runs for release candidates and cache warm-up.
   workflow_dispatch:
-    inputs:
-      macos_only:
-        description: 'Only build the macOS target (runner-capacity probe).'
-        required: false
-        type: boolean
-        default: false
   push:
     branches:
       - 'production/**'
@@ -61,10 +55,7 @@ jobs:
     # head for same-repository branches, so review before labeling.
     if: >-
       (github.event_name != 'pull_request' ||
-       contains(github.event.pull_request.labels.*.name, 'ci:build')) &&
-      (github.event_name != 'workflow_dispatch' ||
-       github.event.inputs.macos_only != 'true' ||
-       matrix.name == 'macos-arm64')
+       contains(github.event.pull_request.labels.*.name, 'ci:build'))
     runs-on: ${{ matrix.os }}
     # A cold Windows build is the slowest target; keep headroom for library
     # download and MSVC/Ninja linking. Hosted runners may still be slower.
@@ -74,21 +65,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: windows-x64
-            os: windows-2022
-            libdir: windows_x64
-            # make.bat uses an absolute `builddir` override verbatim.
-            build_dir: build-windows-x64
-            out_dir: build-windows-x64
-            artifact: goo-engine-windows-x64
-          - name: linux-x64
-            os: ubuntu-24.04
-            libdir: linux_x64
-            # `make ... BUILD_DIR=...` is a command-line override, so GNUmakefile
-            # does not append `_release`; the build tree is exactly build_dir.
-            build_dir: build-linux-x64
-            out_dir: build-linux-x64
-            artifact: goo-engine-linux-x64
           - name: macos-arm64
             os: macos-26
             libdir: macos_arm64
