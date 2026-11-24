@@ -1,0 +1,137 @@
+# SPDX-FileCopyrightText: 2026 Goo Engine Authors
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# EXAMPLE ONLY -- intentionally not under .github/workflows/.
+#
+# This workflow demonstrates how to run the driver matrix on self-hosted GPU
+# runners. Copy it to .github/workflows/driver-matrix.yml only after the
+# hardware lab runners below exist and their labels match this file. The
+# runner labels are matched literally by GitHub Actions; a typo simply leaves
+# the job queued forever.
+#
+# GitHub-hosted runners (ubuntu-latest, windows-latest, macos-latest) have no
+# usable GPU for OpenGL/Vulkan/Metal conformance. They may only run the
+# `static-checks` job at the bottom; never add them to `strategy.matrix`.
+#
+# Each runner is expected to expose the Goo binary through the repository or
+# organisation variable GOO_BINARY (path on the runner). Override the smoke
+# command with GOO_SMOKE_CMD if the lab uses a different harness.
+
+name: driver-matrix
+
+on:
+  workflow_dispatch:
+    inputs:
+      entry:
+        description: "Optional single matrix entry id; empty runs every row that matches the runner"
+        required: false
+        default: ""
+        type: string
+  schedule:
+    # Weekly full sweep on Monday 03:17 UTC (nightly/advisory hardware lab run).
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: driver-matrix-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gpu-matrix:
+    name: "${{ matrix.entry }}"
+    # Labels must be registered on the self-hosted runner, e.g.:
+    #   [self-hosted, windows, x64, gpu-nvidia]
+    # The matrix.json runner_labels field is the source of truth; keep this
+    # include list in sync (or generate it from matrix.json in a prepare job).
+    runs-on: ${{ matrix.labels }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - entry: win11-nvidia
+            labels: [self-hosted, windows, x64, gpu-nvidia, gpu-discrete]
+            tier: gate
+          - entry: win11-intel
+            labels: [self-hosted, windows, x64, gpu-intel, gpu-discrete]
+            tier: gate
+          - entry: ubuntu-24.04-nvidia
+            labels: [self-hosted, linux, x64, gpu-nvidia, gpu-discrete, session-x11]
+            tier: gate
+          - entry: ubuntu-24.04-amd-wayland
+            labels: [self-hosted, linux, x64, gpu-amd, gpu-discrete, session-wayland]
+            tier: nightly
+          - entry: macos-15-apple-metal
+            labels: [self-hosted, macos, arm64, gpu-apple, gpu-integrated]
+            tier: gate
+          - entry: macos-14-apple-opengl
+            labels: [self-hosted, macos, arm64, gpu-apple, gpu-integrated]
+            tier: advisory
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Detect host
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python3 tools/driver_matrix/detect.py --out artifacts/host.json || \
+            python tools/driver_matrix/detect.py --out artifacts/host.json
+          cat artifacts/host.json || true
+
+      - name: Run driver matrix
+        shell: bash
+        env:
+          GOO_BINARY: ${{ vars.GOO_BINARY }}
+          # Optional: set GOO_SMOKE_CMD as a repository variable to override the
+          # default in-application probe (for example a lab wrapper script).
+          GOO_SMOKE_CMD: ${{ vars.GOO_SMOKE_CMD }}
+        run: |
+          set -euo pipefail
+          entry="${{ inputs.entry || '' }}"
+          args=(--out-dir "artifacts/driver-matrix")
+          if [ -n "$entry" ]; then
+            args+=(--entry "$entry")
+          fi
+          if [ -n "${GOO_SMOKE_CMD:-}" ]; then
+            args+=(--smoke-cmd "$GOO_SMOKE_CMD")
+          fi
+          python3 tools/driver_matrix/run_matrix.py "${args[@]}" || \
+            python tools/driver_matrix/run_matrix.py "${args[@]}"
+
+      - name: Upload driver matrix report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: driver-matrix-${{ matrix.entry }}-${{ github.run_id }}
+          path: |
+            artifacts/host.json
+            artifacts/driver-matrix/**
+          if-no-files-found: warn
+          retention-days: 30
+  static-checks:
+    # Safe on a GitHub-hosted runner: validates files, never touches a GPU.
+    name: "static checks (no GPU)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate matrix and scripts
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            tools/driver_matrix/detect.py \
+            tools/driver_matrix/run_matrix.py \
+            tools/driver_matrix/smoke/gpu_probe.py \
+            tools/release/build_release.py \
+            tools/release/verify_release.py
+          python3 tools/driver_matrix/run_matrix.py --validate-only
+          python3 tools/driver_matrix/run_matrix.py --dry-run --allow-empty

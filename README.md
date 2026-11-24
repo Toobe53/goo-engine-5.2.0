@@ -70,6 +70,20 @@ general-compatibility fixtures (stage D of the update plan) are explicitly
 **not run, at the user's request**. Do not interpret the maintenance merge as
 independent verification of every upstream fix, GPU driver or platform.
 
+Production Hardening Status
+---------------------------
+
+The `production/5.2` branch adds CI, CTest registration, crash capture, driver-matrix
+and release-engineering scaffolding. It is intentionally honest about evidence:
+
+- **Verified locally:** Python syntax, workflow static checks, migration/golden
+  manifests, crash-monitor unit tests, and release packaging with synthetic artifacts.
+- **Not yet verified:** a real three-platform CMake build, a green CI run, GPU/EEVEE
+  rendering, real GPU/driver rows, crash dumps, Windows signing, or macOS notarization.
+
+See [docs/production/README.md](docs/production/README.md) for the index and exact
+commands. Do not label a build “production-ready” until the missing evidence exists.
+
 What Was Ported and How
 -----------------------
 

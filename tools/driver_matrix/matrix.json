@@ -1,0 +1,644 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-24",
+  "project": {
+    "name": "Goo Engine",
+    "version": "5.2.0",
+    "branch": "production/5.2"
+  },
+  "policy": {
+    "description": "Target validation matrix for Goo Engine 5.2. This file is a specification plus runner-selection metadata; it does NOT claim that every row has been executed. Rows marked required block a release only after they have actually run on the listed hardware.",
+    "tiers": {
+      "gate": "Must pass before a production release is published (every release candidate).",
+      "nightly": "Runs on the nightly schedule; failures are triaged but do not block a release by themselves.",
+      "advisory": "Best-effort coverage for deprecated or low-share configurations; failures are recorded, not gating."
+    },
+    "required_semantics": "required=true means a failing run of that row blocks the release once the row is part of the executed set. Hardware availability is tracked separately (see docs/production/driver-matrix.md).",
+    "min_driver_basis": "Project baseline 2026-Q4. Values are engineering policy baselines, not vendor certifications. Review quarterly (docs/production/maintenance.md).",
+    "driver_check": "run_matrix.py records a driver conformance verdict per host; only --require-min-driver turns 'below' into a hard failure.",
+    "hosted_ci": {
+      "gpu_available": false,
+      "detail": "GitHub-hosted standard runners expose no usable GPU: Windows and Linux runners have no GPU device (software rasterizers such as WARP/llvmpipe can be used for non-visual tests) and macOS runners are virtualized machines where a discrete GPU / Metal device is not guaranteed. Hosted jobs may lint, validate the matrix and inspect artifacts, but they cannot replace the self-hosted GPU matrix."
+    },
+    "runner_convention": "Use self-hosted runners with the labels listed per row. Labels: self-hosted, <os>, <arch>, gpu-<vendor>, gpu-<kind>, and on Linux session-<x11|wayland>. Runners must be provisioned on persistent hardware with a connected display or dummy plug; nested virtualisation and GPU passthrough are not accepted."
+  },
+  "backends": {
+    "opengl": {
+      "display_name": "OpenGL",
+      "min_api": "4.3",
+      "goo_cli_flag": "--gpu-backend",
+      "goo_cli_value": "opengl",
+      "platforms": ["windows", "linux", "macos"],
+      "status": {
+        "windows": "required",
+        "linux": "required",
+        "macos": "advisory-deprecated"
+      },
+      "notes": "macOS caps OpenGL at 4.1 and Apple deprecated it; Goo on macOS is gated on Metal instead."
+    },
+    "vulkan": {
+      "display_name": "Vulkan",
+      "min_api": "1.2",
+      "goo_cli_flag": "--gpu-backend",
+      "goo_cli_value": "vulkan",
+      "platforms": ["windows", "linux", "macos"],
+      "status": {
+        "windows": "required",
+        "linux": "required",
+        "macos": "unsupported"
+      },
+      "notes": "macOS has no native Vulkan; MoltenVK is not a production target for 5.2 and is intentionally not gated."
+    },
+    "metal": {
+      "display_name": "Metal",
+      "min_api": "Metal 3",
+      "goo_cli_flag": "--gpu-backend",
+      "goo_cli_value": "metal",
+      "platforms": ["macos"],
+      "status": {
+        "macos": "required"
+      },
+      "notes": "Requires macOS 13+ and Metal 3 capable Apple silicon or supported AMD GPU on Intel Macs."
+    }
+  },
+  "binary_candidates": [
+    "{repo_root}/../goo.bin",
+    "{repo_root}/build/bin/goo",
+    "{repo_root}/build/bin/goo.exe",
+    "{repo_root}/build/bin/Release/goo.exe",
+    "{repo_root}/build_windows/bin/goo.exe",
+    "{repo_root}/build_linux/bin/goo"
+  ],
+  "test_sets": {
+    "smoke-opengl": {
+      "description": "Launch headless, create an OpenGL GPU context and dump GPU/backend identity. Fails if the expected backend is not active.",
+      "backend": "opengl",
+      "timeout_sec": 600,
+      "required": true,
+      "commands": [
+        [
+          "{goo_binary}",
+          "--background",
+          "--factory-startup",
+          "--gpu-backend",
+          "{backend}",
+          "--python-exit-code",
+          "1",
+          "--python",
+          "{repo_root}/tools/driver_matrix/smoke/gpu_probe.py",
+          "--",
+          "--expect-backend",
+          "{backend}",
+          "--json-out",
+          "{out_dir}/probe-{entry_id}-{backend}.json"
+        ]
+      ]
+    },
+    "smoke-vulkan": {
+      "description": "Launch headless, create a Vulkan GPU context and dump GPU/backend identity. Fails if Vulkan falls back to another backend.",
+      "backend": "vulkan",
+      "timeout_sec": 600,
+      "required": true,
+      "commands": [
+        [
+          "{goo_binary}",
+          "--background",
+          "--factory-startup",
+          "--gpu-backend",
+          "{backend}",
+          "--python-exit-code",
+          "1",
+          "--python",
+          "{repo_root}/tools/driver_matrix/smoke/gpu_probe.py",
+          "--",
+          "--expect-backend",
+          "{backend}",
+          "--json-out",
+          "{out_dir}/probe-{entry_id}-{backend}.json"
+        ]
+      ]
+    },
+    "smoke-metal": {
+      "description": "Launch headless, create a Metal GPU context and dump GPU/backend identity. Fails if Metal is unavailable.",
+      "backend": "metal",
+      "timeout_sec": 600,
+      "required": true,
+      "commands": [
+        [
+          "{goo_binary}",
+          "--background",
+          "--factory-startup",
+          "--gpu-backend",
+          "{backend}",
+          "--python-exit-code",
+          "1",
+          "--python",
+          "{repo_root}/tools/driver_matrix/smoke/gpu_probe.py",
+          "--",
+          "--expect-backend",
+          "{backend}",
+          "--json-out",
+          "{out_dir}/probe-{entry_id}-{backend}.json"
+        ]
+      ]
+    },
+    "render-eevee": {
+      "description": "Render frame 1 of the factory startup scene with EEVEE on the selected backend and require a non-empty PNG. This exercises real GPU rendering rather than only context creation.",
+      "per_backend": true,
+      "timeout_sec": 900,
+      "required": false,
+      "commands": [
+        [
+          "{goo_binary}",
+          "--background",
+          "--factory-startup",
+          "--gpu-backend",
+          "{backend}",
+          "-o",
+          "{out_dir}/render_{entry_id}_{backend}_",
+          "-F",
+          "PNG",
+          "-f",
+          "1"
+        ]
+      ],
+      "artifacts": [
+        "{out_dir}/render_{entry_id}_{backend}_*.png"
+      ]
+    }
+  },
+  "environments": [
+    {
+      "id": "win10-nvidia",
+      "description": "Windows 10 22H2, NVIDIA Pascal/Turing discrete GPU",
+      "os": {
+        "family": "windows",
+        "release": "10",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "examples": ["GTX 1060 6GB", "GTX 1660", "RTX 2060"],
+        "min_driver": {
+          "display": "NVIDIA Windows 536.23",
+          "scheme": "nvidia-windows",
+          "version": "536.23"
+        }
+      },
+      "display_server": "windows",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "windows", "x64", "gpu-nvidia", "gpu-discrete"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Legacy Windows 10 user base. Vulkan on Pascal is supported but EEVEE Next performance must be checked manually."
+    },
+    {
+      "id": "win10-amd",
+      "description": "Windows 10 22H2, AMD Polaris/RDNA1 discrete GPU",
+      "os": {
+        "family": "windows",
+        "release": "10",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "amd",
+        "kind": "discrete",
+        "examples": ["RX 580 8GB", "RX 5700 XT"],
+        "min_driver": {
+          "display": "AMD Adrenalin 24.3.1",
+          "scheme": "amd-windows-raw",
+          "version": "24.3.1",
+          "raw_version": "31.0.24033.1003"
+        }
+      },
+      "display_server": "windows",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "windows", "x64", "gpu-amd", "gpu-discrete"],
+      "required": true,
+      "tier": "gate",
+      "notes": "AMD's Windows OpenGL driver has a different code path from RADV on Linux; both are required."
+    },
+    {
+      "id": "win10-intel-igpu",
+      "description": "Windows 10 22H2, Intel UHD/Iris Xe integrated GPU",
+      "os": {
+        "family": "windows",
+        "release": "10",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "intel",
+        "kind": "integrated",
+        "examples": ["UHD 630", "Iris Xe"],
+        "min_driver": {
+          "display": "Intel Windows 31.0.101.5186",
+          "scheme": "intel-windows-raw",
+          "version": "31.0.101.5186",
+          "raw_version": "31.0.101.5186"
+        }
+      },
+      "display_server": "windows",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan"],
+      "runner_labels": ["self-hosted", "windows", "x64", "gpu-intel", "gpu-integrated"],
+      "required": false,
+      "tier": "nightly",
+      "notes": "Largest installed base for crash reports. Not release-gating until a dedicated lab machine exists."
+    },
+    {
+      "id": "win11-nvidia",
+      "description": "Windows 11 23H2+, NVIDIA RTX 30/40 discrete GPU",
+      "os": {
+        "family": "windows",
+        "release": "11",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "examples": ["RTX 3060", "RTX 4070", "RTX 4090"],
+        "min_driver": {
+          "display": "NVIDIA Windows 536.23",
+          "scheme": "nvidia-windows",
+          "version": "536.23"
+        }
+      },
+      "display_server": "windows",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "windows", "x64", "gpu-nvidia", "gpu-discrete"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Primary Windows gate. Keep at least one RTX 40 machine for EEVEE Next performance checks."
+    },
+    {
+      "id": "win11-amd",
+      "description": "Windows 11 23H2+, AMD RDNA2/RDNA3 discrete GPU",
+      "os": {
+        "family": "windows",
+        "release": "11",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "amd",
+        "kind": "discrete",
+        "examples": ["RX 6700 XT", "RX 7800 XT"],
+        "min_driver": {
+          "display": "AMD Adrenalin 24.3.1",
+          "scheme": "amd-windows-raw",
+          "version": "24.3.1",
+          "raw_version": "31.0.24033.1003"
+        }
+      },
+      "display_server": "windows",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "windows", "x64", "gpu-amd", "gpu-discrete"],
+      "required": true,
+      "tier": "gate",
+      "notes": "AMD Windows OpenGL is the most common source of platform-specific rendering bugs."
+    },
+    {
+      "id": "win11-intel",
+      "description": "Windows 11 23H2+, Intel Arc discrete GPU (shared driver baseline covers Iris Xe)",
+      "os": {
+        "family": "windows",
+        "release": "11",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "intel",
+        "kind": "discrete",
+        "examples": ["Arc A750", "Arc A770"],
+        "min_driver": {
+          "display": "Intel Windows 31.0.101.5186",
+          "scheme": "intel-windows-raw",
+          "version": "31.0.101.5186",
+          "raw_version": "31.0.101.5186"
+        }
+      },
+      "display_server": "windows",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "windows", "x64", "gpu-intel", "gpu-discrete"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Arc and Iris Xe share the same driver package; a single Arc runner is acceptable for gate coverage."
+    },
+    {
+      "id": "ubuntu-22.04-nvidia",
+      "description": "Ubuntu 22.04 LTS X11, NVIDIA proprietary driver",
+      "os": {
+        "family": "linux",
+        "release": "22.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "examples": ["RTX 3060", "RTX 3090"],
+        "min_driver": {
+          "display": "NVIDIA Linux 535.104.05",
+          "scheme": "nvidia-linux",
+          "version": "535.104.05"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-nvidia", "gpu-discrete", "session-x11"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Primary Linux gate for the studio pipeline; X11 session is still the default on most workstations."
+    },
+    {
+      "id": "ubuntu-22.04-amd",
+      "description": "Ubuntu 22.04 LTS X11, AMD GPU with Mesa RADV",
+      "os": {
+        "family": "linux",
+        "release": "22.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "amd",
+        "kind": "discrete",
+        "examples": ["RX 6600 XT", "RX 6800"],
+        "min_driver": {
+          "display": "Mesa 23.2.1 (RADV/ANV)",
+          "scheme": "mesa",
+          "version": "23.2.1"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-amd", "gpu-discrete", "session-x11"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Mesa version is the effective driver version on Linux; the kernel amdgpu module version is recorded separately."
+    },
+    {
+      "id": "ubuntu-22.04-intel",
+      "description": "Ubuntu 22.04 LTS X11, Intel GPU with Mesa ANV",
+      "os": {
+        "family": "linux",
+        "release": "22.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "intel",
+        "kind": "discrete",
+        "examples": ["Arc A770", "Iris Xe"],
+        "min_driver": {
+          "display": "Mesa 23.2.1 (RADV/ANV)",
+          "scheme": "mesa",
+          "version": "23.2.1"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-intel", "gpu-discrete", "session-x11"],
+      "required": false,
+      "tier": "nightly",
+      "notes": "Intel Linux coverage is nightly; ANV driver regressions are reported upstream to Mesa."
+    },
+    {
+      "id": "ubuntu-24.04-nvidia",
+      "description": "Ubuntu 24.04 LTS X11, NVIDIA proprietary driver",
+      "os": {
+        "family": "linux",
+        "release": "24.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "examples": ["RTX 4070", "RTX 4090"],
+        "min_driver": {
+          "display": "NVIDIA Linux 535.104.05",
+          "scheme": "nvidia-linux",
+          "version": "535.104.05"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-nvidia", "gpu-discrete", "session-x11"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Newest LTS; new pipelines should standardise here. Keep the 22.04 rows until migration completes."
+    },
+    {
+      "id": "ubuntu-24.04-amd",
+      "description": "Ubuntu 24.04 LTS X11, AMD GPU with Mesa RADV",
+      "os": {
+        "family": "linux",
+        "release": "24.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "amd",
+        "kind": "discrete",
+        "examples": ["RX 7800 XT", "RX 7900 XTX"],
+        "min_driver": {
+          "display": "Mesa 24.0.9 (RADV/ANV)",
+          "scheme": "mesa",
+          "version": "24.0.9"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-amd", "gpu-discrete", "session-x11"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Ubuntu 24.04 ships Mesa 24.0.x; do not silently downgrade to an older Mesa PPA."
+    },
+    {
+      "id": "ubuntu-24.04-intel",
+      "description": "Ubuntu 24.04 LTS X11, Intel Arc/Iris with Mesa ANV",
+      "os": {
+        "family": "linux",
+        "release": "24.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "intel",
+        "kind": "discrete",
+        "examples": ["Arc A770", "Iris Xe"],
+        "min_driver": {
+          "display": "Mesa 24.0.9 (RADV/ANV)",
+          "scheme": "mesa",
+          "version": "24.0.9"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-intel", "gpu-discrete", "session-x11"],
+      "required": false,
+      "tier": "nightly",
+      "notes": "Nightly coverage only; see ubuntu-24.04-intel-wayland for the Wayland follow-up."
+    },
+    {
+      "id": "ubuntu-24.04-nvidia-wayland",
+      "description": "Ubuntu 24.04 LTS Wayland session, NVIDIA proprietary driver",
+      "os": {
+        "family": "linux",
+        "release": "24.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "examples": ["RTX 4070"],
+        "min_driver": {
+          "display": "NVIDIA Linux 535.104.05",
+          "scheme": "nvidia-linux",
+          "version": "535.104.05"
+        }
+      },
+      "display_server": "wayland",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-nvidia", "gpu-discrete", "session-wayland"],
+      "required": false,
+      "tier": "nightly",
+      "notes": "Wayland changes window/system integration but not GPU rendering; nightly coverage catches compositor regressions."
+    },
+    {
+      "id": "ubuntu-24.04-amd-wayland",
+      "description": "Ubuntu 24.04 LTS Wayland session, AMD GPU with Mesa RADV",
+      "os": {
+        "family": "linux",
+        "release": "24.04",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "amd",
+        "kind": "discrete",
+        "examples": ["RX 7800 XT"],
+        "min_driver": {
+          "display": "Mesa 24.0.9 (RADV/ANV)",
+          "scheme": "mesa",
+          "version": "24.0.9"
+        }
+      },
+      "display_server": "wayland",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-amd", "gpu-discrete", "session-wayland"],
+      "required": false,
+      "tier": "nightly",
+      "notes": "Wayland coverage is nightly until the studio pipeline finishes its Wayland migration."
+    },
+    {
+      "id": "macos-14-apple-metal",
+      "description": "macOS 14 Sonoma, Apple silicon (M1/M2/M3), Metal",
+      "os": {
+        "family": "macos",
+        "release": "14",
+        "arch": "arm64"
+      },
+      "gpu": {
+        "vendor": "apple",
+        "kind": "integrated",
+        "examples": ["Apple M1", "Apple M2 Pro", "Apple M3"],
+        "min_driver": {
+          "display": "macOS 14.0 (Apple GPU driver is OS-bundled)",
+          "scheme": "apple-os",
+          "version": "14.0"
+        }
+      },
+      "display_server": "quartz",
+      "backends": ["metal"],
+      "test_sets": ["smoke-metal", "render-eevee"],
+      "runner_labels": ["self-hosted", "macos", "arm64", "gpu-apple", "gpu-integrated"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Apple ships the GPU driver with the OS; the minimum driver is effectively the minimum macOS version."
+    },
+    {
+      "id": "macos-15-apple-metal",
+      "description": "macOS 15 Sequoia, Apple silicon (M2/M3/M4), Metal",
+      "os": {
+        "family": "macos",
+        "release": "15",
+        "arch": "arm64"
+      },
+      "gpu": {
+        "vendor": "apple",
+        "kind": "integrated",
+        "examples": ["Apple M2", "Apple M3 Pro", "Apple M4"],
+        "min_driver": {
+          "display": "macOS 15.0 (Apple GPU driver is OS-bundled)",
+          "scheme": "apple-os",
+          "version": "15.0"
+        }
+      },
+      "display_server": "quartz",
+      "backends": ["metal"],
+      "test_sets": ["smoke-metal", "render-eevee"],
+      "runner_labels": ["self-hosted", "macos", "arm64", "gpu-apple", "gpu-integrated"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Newest macOS gate; macOS 14 stays gated until the studio baseline moves."
+    },
+    {
+      "id": "macos-14-apple-opengl",
+      "description": "macOS 14 Sonoma, Apple silicon, deprecated OpenGL 4.1 path",
+      "os": {
+        "family": "macos",
+        "release": "14",
+        "arch": "arm64"
+      },
+      "gpu": {
+        "vendor": "apple",
+        "kind": "integrated",
+        "examples": ["Apple M1", "Apple M2"],
+        "min_driver": {
+          "display": "macOS 14.0 (Apple OpenGL driver is OS-bundled)",
+          "scheme": "apple-os",
+          "version": "14.0"
+        }
+      },
+      "display_server": "quartz",
+      "backends": ["opengl"],
+      "test_sets": ["smoke-opengl"],
+      "runner_labels": ["self-hosted", "macos", "arm64", "gpu-apple", "gpu-integrated"],
+      "required": false,
+      "tier": "advisory",
+      "notes": "Advisory only: Apple deprecated OpenGL and caps it at 4.1. Kept to detect accidental regressions for users still on the legacy path."
+    },
+    {
+      "id": "macos-15-intel-amd-metal",
+      "description": "macOS 15 Sequoia on a supported Intel Mac with AMD GPU, Metal",
+      "os": {
+        "family": "macos",
+        "release": "15",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "amd",
+        "kind": "discrete",
+        "examples": ["Radeon Pro 5500M", "Radeon Pro 5600M"],
+        "min_driver": {
+          "display": "macOS 15.0 (AMD GPU driver is OS-bundled)",
+          "scheme": "apple-os",
+          "version": "15.0"
+        }
+      },
+      "display_server": "quartz",
+      "backends": ["metal"],
+      "test_sets": ["smoke-metal"],
+      "runner_labels": ["self-hosted", "macos", "x64", "gpu-amd", "gpu-discrete"],
+      "required": false,
+      "tier": "advisory",
+      "notes": "Advisory: Intel Macs are a shrinking share and macOS 15 is the last supported major release for some models."
+    }
+  ]
+}
