@@ -88,3 +88,13 @@ compile_commands.json
 blendcache_*
 *.blend1
 *.blend2
+
+# Production CI workflows must remain tracked despite the broad dotfile rule.
+!/.github/
+!/.github/workflows/
+!/.github/workflows/*.yml
+
+# Production CI and local test outputs.
+/build-*/
+/ci-logs/
+/goo_test_output/

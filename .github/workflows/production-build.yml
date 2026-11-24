@@ -1,0 +1,381 @@
+# Production source-build matrix for GOO Engine (Blender 5.2 LTS port).
+#
+# HONESTY / SCOPE
+# - This workflow is a CI skeleton: it compiles the three supported desktop targets
+#   from source and uploads logs + build output. It has NOT been executed on
+#   GitHub-hosted runners from this repository yet. Treat the first run as a smoke
+#   test, not as proof that release binaries are reproducible or complete.
+# - GitHub-hosted runners have NO GPU. This workflow therefore does not run EEVEE
+#   or Cycles render regressions and does not assert runtime rendering
+#   correctness. GPU/driver regressions belong to the self-hosted driver matrix
+#   (see tools/driver_matrix/ and docs/production/driver-matrix.md).
+# - CMake auto-disables CUDA/HIP/oneAPI kernel binaries when the vendor toolchains
+#   are absent (intern/cycles/cmake/external_libs.cmake), so these jobs produce
+#   builds without precompiled GPU kernels. Packaging GPU kernels requires a
+#   self-hosted runner with the vendor toolchains; that is out of scope here.
+# - No packaging, code signing, notarization, or upload to a release channel.
+name: production-build
+
+on:
+  # Manual runs for release candidates and cache warm-up.
+  workflow_dispatch:
+  push:
+    branches:
+      - 'production/**'
+  # PR builds are opt-in through the `ci:build` label; see the job-level `if`.
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  # Superseded PR runs are cancelled; production branch runs are kept so release
+  # history is not silently discarded.
+  group: production-build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Bump to invalidate the precompiled-library, CMake, and ccache caches without
+  # changing the workflow structure.
+  CI_CACHE_EPOCH: '1'
+  # Precompiled libraries are Git LFS content. Let make_update.py run its
+  # two-stage checkout + `git lfs pull` instead of smudging during checkout.
+  GIT_LFS_SKIP_SMUDGE: '1'
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CCACHE_MAXSIZE: 2G
+  CCACHE_BASEDIR: ${{ github.workspace }}
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    # Pull requests only build after a maintainer applies the `ci:build` label.
+    # This keeps untrusted fork code from consuming hosted-runner minutes and
+    # artifact storage. Note the workflow file itself still comes from the PR
+    # head for same-repository branches, so review before labeling.
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'ci:build')
+    runs-on: ${{ matrix.os }}
+    # A cold Windows build is the slowest target; keep headroom for library
+    # download and MSVC/Ninja linking. Hosted runners may still be slower.
+    timeout-minutes: 180
+    strategy:
+      # One platform failing must not cancel the other two.
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows-x64
+            os: windows-2022
+            libdir: windows_x64
+            # make.bat uses an absolute `builddir` override verbatim.
+            build_dir: build-windows-x64
+            out_dir: build-windows-x64
+            artifact: goo-engine-windows-x64
+          - name: linux-x64
+            os: ubuntu-24.04
+            libdir: linux_x64
+            # GNUmakefile appends `_release` to BUILD_DIR for the release target.
+            build_dir: build-linux-x64
+            out_dir: build-linux-x64_release
+            artifact: goo-engine-linux-x64
+          - name: macos-arm64
+            os: macos-15
+            libdir: macos_arm64
+            # GNUmakefile appends `_release` to BUILD_DIR for the release target.
+            build_dir: build-macos-arm64
+            out_dir: build-macos-arm64_release
+            artifact: goo-engine-macos-arm64
+    steps:
+      - name: Checkout source (submodules fetched later by make_update.py)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python for build scripts
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if sudo apt-get update; then
+              break
+            fi
+            if [ "${attempt}" -eq 3 ]; then
+              echo "apt-get update failed after 3 attempts" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+          # Blender 5.2 requires GCC 14.0+ (CMakeLists.txt), so install gcc-14
+          # explicitly; Ubuntu 24.04's default GCC 13 is too old.
+          sudo apt-get install -y --no-install-recommends \
+            build-essential gcc-14 g++-14 \
+            git git-lfs cmake ninja-build ccache patch \
+            libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev \
+            libxinerama-dev libxkbcommon-dev libwayland-dev libdecor-0-dev \
+            wayland-protocols libdbus-1-dev libgl-dev libegl-dev \
+            libjack-jackd2-dev libpulse-dev libpipewire-0.3-dev
+          gcc-14 --version | head -n 1
+          g++-14 --version | head -n 1
+          cmake --version | head -n 1
+          ninja --version
+
+      - name: Install build dependencies (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+        run: |
+          set -euo pipefail
+          # Xcode 16+ with Apple Clang 17+ is preinstalled on macos-15 runners.
+          brew install cmake ninja ccache git-lfs
+          xcode-select -p
+          clang --version | head -n 1
+          clang_major="$(clang --version | head -n 1 | sed -E 's/.*version ([0-9]+)\..*/\1/')"
+          if [ -z "${clang_major}" ] || [ "${clang_major}" -lt 17 ]; then
+            echo "Apple Clang 17.0 or newer is required (Blender 5.2); found: ${clang_major}" >&2
+            exit 1
+          fi
+
+      - name: Verify build dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # The windows-2022 image provides CMake, Ninja, Git, and Git LFS.
+          foreach ($tool in 'cmake', 'ninja', 'git') {
+            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+              throw "$tool was not found on PATH"
+            }
+          }
+          cmake --version | Select-Object -First 1
+          ninja --version
+          git --version
+          git lfs version
+
+      - name: Verify MSVC 2022 toolchain (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          if (-not (Test-Path $vswhere)) {
+            throw 'vswhere.exe not found; Visual Studio 2022 with the C++ workload is required'
+          }
+          $install = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $install) {
+            throw 'No Visual Studio installation with the C++ x64 toolchain was found'
+          }
+          $msvcRoot = Join-Path $install 'VC\Tools\MSVC'
+          $cl = Get-ChildItem -Path $msvcRoot -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName 'bin\Hostx64\x64\cl.exe' } |
+            Where-Object { Test-Path $_ } |
+            Select-Object -First 1
+          if (-not $cl) {
+            throw "cl.exe was not found under $msvcRoot; install the MSVC v143 x64 toolset"
+          }
+          # Read the compiler version from the PE metadata instead of running
+          # vcvars64.bat: this avoids cmd.exe quoting pitfalls and is sufficient
+          # because make.bat discovers/initialises MSVC on its own.
+          $fileVersion = (Get-Item $cl).VersionInfo.FileVersion
+          Write-Host "MSVC cl.exe: $cl"
+          Write-Host "MSVC cl.exe file version: $fileVersion"
+          if ("$fileVersion" -notmatch '^(\d+)\.(\d+)\.(\d+)') {
+            throw "Unable to parse the MSVC compiler version from: $fileVersion"
+          }
+          $found = [version]::new([int]$Matches[1], [int]$Matches[2], [int]$Matches[3])
+          # Mirrors build_files/cmake/platform/platform_win32.cmake: MSVC 2022 17.14.14+.
+          $minimum = [version]::new(19, 44, 35216)
+          if ($found -lt $minimum) {
+            throw "MSVC cl $found is older than the required $minimum (Visual Studio 2022 17.14.14 or newer)"
+          }
+          Write-Host "MSVC toolchain version check passed: $found >= $minimum"
+
+      - name: Resolve precompiled-library revision (Unix)
+        if: runner.os != 'Windows'
+        id: libs_rev_unix
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git ls-tree HEAD "lib/${{ matrix.libdir }}" | awk '{print $3}')"
+          printf 'sha=%s\n' "${sha:-nogitlink}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve precompiled-library revision (Windows)
+        if: runner.os == 'Windows'
+        id: libs_rev_win
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $line = (git ls-tree HEAD "lib/${{ matrix.libdir }}" | Select-Object -First 1)
+          if ($LASTEXITCODE -ne 0) {
+            throw 'git ls-tree failed while resolving the precompiled-library submodule'
+          }
+          $sha = 'nogitlink'
+          if ($line) {
+            $parts = $line -split '\s+'
+            if ($parts.Count -ge 3) { $sha = $parts[2] }
+          }
+          "sha=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Cache precompiled libraries (keyed on lib submodule commit)
+        uses: actions/cache@v4
+        with:
+          path: |
+            lib/${{ matrix.libdir }}
+            .git/modules/lib/${{ matrix.libdir }}
+          key: libs-${{ runner.os }}-${{ matrix.libdir }}-${{ steps.libs_rev_unix.outputs.sha || steps.libs_rev_win.outputs.sha }}-${{ env.CI_CACHE_EPOCH }}
+          restore-keys: |
+            libs-${{ runner.os }}-${{ matrix.libdir }}-
+
+      - name: Cache CMake configure results
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.out_dir }}/CMakeCache.txt
+          key: cmake-${{ runner.os }}-${{ matrix.name }}-${{ hashFiles('CMakeLists.txt', 'build_files/cmake/**/*.cmake') }}-${{ env.CI_CACHE_EPOCH }}
+          restore-keys: |
+            cmake-${{ runner.os }}-${{ matrix.name }}-
+
+      # Windows builds do not use ccache here: make.bat supports sccache, but the
+      # hosted image does not ship it and enabling it is left to a follow-up.
+      - name: Cache ccache (Linux/macOS)
+        if: runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ matrix.name }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.name }}-
+
+      - name: Record toolchain and environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-logs
+          {
+            echo "job=${{ matrix.name }}"
+            echo "runner=${{ runner.os }}"
+            uname -a || true
+            cmake --version | head -n 1 || true
+            ninja --version || true
+            git --version || true
+            git lfs version || true
+            python --version || true
+            ccache --version | head -n 1 || true
+          } > ci-logs/toolchain.txt 2>&1
+          cat ci-logs/toolchain.txt
+
+      - name: Fetch precompiled libraries (make update, non-interactive)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-logs
+          # --no-blender: the checked-out revision is authoritative in CI; do not
+          # pull the branch underneath the build. This also skips the main-repo
+          # LFS pull, which is not needed to compile.
+          # --no-lfs-fallback: do not add/fetch Blender's main-repo LFS fallback
+          # remote; the lib submodules fetch LFS from their own origins.
+          python build_files/utils/make_update.py \
+            --no-blender \
+            --no-lfs-fallback \
+            --git-command git 2>&1 | tee ci-logs/update.log
+
+      - name: Fetch precompiled libraries (make update, non-interactive)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force -Path ci-logs | Out-Null
+          & python build_files/utils/make_update.py --no-blender --no-lfs-fallback --git-command git 2>&1 | Tee-Object -FilePath ci-logs/update.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            throw "make_update.py failed with exit code $code"
+          }
+
+      - name: Build release (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          CC: gcc-14
+          CXX: g++-14
+        run: |
+          set -euo pipefail
+          mkdir -p ci-logs
+          make release ninja ccache BUILD_DIR="${{ github.workspace }}/${{ matrix.build_dir }}" 2>&1 | tee ci-logs/build.log
+
+      - name: Build release (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-logs
+          make release ninja ccache BUILD_DIR="${{ github.workspace }}/${{ matrix.build_dir }}" 2>&1 | tee ci-logs/build.log
+
+      - name: Build release (Windows, MSVC + Ninja)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force -Path ci-logs | Out-Null
+          $buildDir = "${{ github.workspace }}\${{ matrix.build_dir }}"
+          if ($buildDir -match '\s') {
+            throw "Build path contains whitespace, which make.bat does not support: $buildDir"
+          }
+          & cmd.exe /d /c "make.bat release ninja builddir $buildDir 2>&1" | Tee-Object -FilePath ci-logs/build.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            throw "make.bat release build failed with exit code $code"
+          }
+
+      # This step intentionally has no `continue-on-error`: a failure in the
+      # release build marks the platform red. The only tolerated failures above
+      # are optional diagnostics in "Record toolchain and environment".
+      - name: Collect build diagnostics (always)
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          mkdir -p ci-logs
+          for f in \
+            "${{ matrix.out_dir }}/CMakeFiles/CMakeOutput.log" \
+            "${{ matrix.out_dir }}/CMakeFiles/CMakeError.log" \
+            "${{ matrix.out_dir }}/CMakeFiles/CMakeConfigureLog.yaml" \
+            "${{ matrix.out_dir }}/CMakeCache.txt" \
+            "${{ matrix.out_dir }}/buildtime.txt"; do
+            if [ -f "$f" ]; then
+              cp "$f" "ci-logs/$(basename "$f")"
+            fi
+          done
+          { echo '--- ci-logs ---'; ls -l ci-logs; } || true
+
+      - name: Upload build logs and configuration (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.name }}
+          path: |
+            ci-logs/**
+            ${{ matrix.out_dir }}/CMakeFiles/CMakeOutput.log
+            ${{ matrix.out_dir }}/CMakeFiles/CMakeError.log
+            ${{ matrix.out_dir }}/CMakeFiles/CMakeConfigureLog.yaml
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload build output (success only)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.out_dir }}/bin/**
+          if-no-files-found: error
+          retention-days: 7
