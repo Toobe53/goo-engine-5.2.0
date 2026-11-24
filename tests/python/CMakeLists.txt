@@ -1784,3 +1784,105 @@ if(WITH_LINUX_OFFICIAL_RELEASE_TESTS)
   unset(extra_args)
   unset(release_root_folder)
 endif()
+
+
+# ------------------------------------------------------------------------------
+# Goo EEVEE production test gate
+#
+# The four Goo entry points cannot be registered directly with add_blender_test:
+#   * goo_light_groups.py is a host matrix runner (needs --blender/--output),
+#   * goo_bsdf_light_groups.py and goo_screenspace.py must run inside Blender and
+#     refuse an existing --output directory,
+#   * goo_bsdf_light_groups_cases.py has no main (reached via --case <name>).
+# goo_ctest_runner.py prepares a fresh output dir, probes for a headless GPU and
+# returns 77 (skip) when no usable Blender/GPU is available.  The manifest/spec
+# entries are host-only and must pass without a GPU.
+# ------------------------------------------------------------------------------
+
+set(GOO_TEST_OUT_DIR "${TEST_OUT_DIR}/goo")
+set(GOO_TEST_RUNNER "${CMAKE_CURRENT_LIST_DIR}/goo_ctest_runner.py")
+set(GOO_TEST_STARTUP_DIR "${CMAKE_SOURCE_DIR}/scripts/startup")
+
+if(NOT EXISTS "${GOO_TEST_STARTUP_DIR}/goo_engine_light_groups.py")
+  message(STATUS "Goo tests not registered: ${GOO_TEST_STARTUP_DIR}/goo_engine_light_groups.py is missing")
+  return()
+endif()
+if(NOT EXISTS "${GOO_TEST_RUNNER}")
+  message(FATAL_ERROR "Goo test runner is missing: ${GOO_TEST_RUNNER}")
+endif()
+
+foreach(_goo_test
+    light-groups
+    bsdf-light-groups
+    bsdf-light-groups-cases
+    screenspace
+  )
+  string(REPLACE "-" "_" _goo_name "${_goo_test}")
+  add_python_test(
+    "goo_${_goo_name}"
+    "${GOO_TEST_RUNNER}"
+    --test "${_goo_test}"
+    --blender "${TEST_BLENDER_EXE}"
+    --startup "${GOO_TEST_STARTUP_DIR}"
+    --output-root "${GOO_TEST_OUT_DIR}"
+    --timeout 1740
+  )
+  set_tests_properties("goo_${_goo_name}" PROPERTIES
+    LABELS "goo;render;slow"
+    TIMEOUT 1800
+    SKIP_RETURN_CODE 77
+    RUN_SERIAL TRUE
+  )
+endforeach()
+unset(_goo_test)
+unset(_goo_name)
+
+add_python_test(
+  goo_migration_manifest
+  "${CMAKE_CURRENT_LIST_DIR}/goo_migration_fixtures.py"
+  --descriptor-only
+  --output-dir "${GOO_TEST_OUT_DIR}/migration_manifest"
+)
+set_tests_properties(goo_migration_manifest PROPERTIES
+  LABELS "goo"
+  TIMEOUT 120
+)
+
+add_python_test(
+  goo_migration_fixtures
+  "${CMAKE_CURRENT_LIST_DIR}/goo_migration_fixtures.py"
+  --blender "${TEST_BLENDER_EXE}"
+  --output-dir "${GOO_TEST_OUT_DIR}/migration_fixtures"
+)
+set_tests_properties(goo_migration_fixtures PROPERTIES
+  LABELS "goo;slow"
+  TIMEOUT 900
+  SKIP_RETURN_CODE 77
+)
+
+add_python_test(
+  goo_golden_manifest
+  "${CMAKE_CURRENT_LIST_DIR}/goo_golden_smoke.py"
+  --spec
+  --output-dir "${GOO_TEST_OUT_DIR}/golden_manifest"
+)
+set_tests_properties(goo_golden_manifest PROPERTIES
+  LABELS "goo"
+  TIMEOUT 120
+)
+
+add_python_test(
+  goo_golden_smoke
+  "${CMAKE_CURRENT_LIST_DIR}/goo_golden_smoke.py"
+  --run
+  --blender "${TEST_BLENDER_EXE}"
+  --golden-dir "${CMAKE_SOURCE_DIR}/tests/files/goo_golden"
+  --output-dir "${GOO_TEST_OUT_DIR}/golden_smoke"
+  --timeout 1740
+)
+set_tests_properties(goo_golden_smoke PROPERTIES
+  LABELS "goo;render;slow"
+  TIMEOUT 1800
+  SKIP_RETURN_CODE 77
+  RUN_SERIAL TRUE
+)
