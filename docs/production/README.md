@@ -7,7 +7,7 @@
 - [构建与 CI](../../tools/ci/README.md)：Windows/Linux 构建入口、触发条件、产物和本地前置探测。
 - [测试门禁](../../tests/python/README-goo-tests.md)：CTest 注册、GPU 探测、迁移 fixture、黄金场景与 skip 语义。
 - [崩溃监控](crash-monitoring.md)：采集、脱敏、bundle 与上传计划。
-- [驱动矩阵](driver-matrix.md)：19 个环境、门禁/nightly 分层、执行器和报告格式。
+- [驱动矩阵](driver-matrix.md)：19 个环境（Windows/Linux 15 行交付，macOS 4 行历史）、门禁/nightly 分层、执行器和报告格式。
 - [发布工程](release.md)：打包、SHA256SUMS、manifest、签名/公证占位与发布后复验。
 - [长期维护](maintenance.md)：驱动季度复核、上游跟进、triage、回滚演练与责任人占位。
 - [验证证据](evidence.md)：CI 构建、Windows 运行时与测试门禁。
