@@ -73,7 +73,15 @@ def arguments():
                         help='internal budget in seconds (keep below the CTest TIMEOUT)')
     parser.add_argument('--cases', default='',
                         help='comma separated override of the case list (Blender tests only)')
-    return parser.parse_args()
+    args = parser.parse_args()
+    # The runner changes its working directory per test case. Resolve all
+    # caller-relative paths before that happens; otherwise a relative
+    # --blender/--startup path looks valid here but disappears in the child.
+    args.blender = args.blender.resolve()
+    if args.startup is not None:
+        args.startup = args.startup.resolve()
+    args.output_root = args.output_root.resolve()
+    return args
 
 
 def make_blender_command(blender, script, output_dir, startup, case):

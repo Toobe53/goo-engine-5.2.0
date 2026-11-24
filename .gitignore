@@ -98,3 +98,4 @@ blendcache_*
 /build-*/
 /ci-logs/
 /goo_test_output/
+/_verify/

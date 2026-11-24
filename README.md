@@ -76,10 +76,16 @@ Production Hardening Status
 The `production/5.2` branch adds CI, CTest registration, crash capture, driver-matrix
 and release-engineering scaffolding. It is intentionally honest about evidence:
 
-- **Verified locally:** Python syntax, workflow static checks, migration/golden
-  manifests, crash-monitor unit tests, and release packaging with synthetic artifacts.
-- **Not yet verified:** a real three-platform CMake build, a green CI run, GPU/EEVEE
-  rendering, real GPU/driver rows, crash dumps, Windows signing, or macOS notarization.
+- **Verified:** Linux and Windows release builds from CI run `45384517223`
+  (commit `9d4dce4e`); Windows startup, all 13 Goo nodes, EEVEE 64x64 render,
+  shadow-ID render, and the four Goo test wrappers on the built Windows binary.
+  macOS compiled successfully in run `45344327291`, but no macOS artifact was
+  produced.
+- **Not yet verified:** one all-three-green CI run with a macOS artifact, a real
+  `ctest -L goo` execution under CMake, GPU/driver matrix rows, real crash dumps,
+  Windows signing, or macOS notarization.
+- Exact runs, test counts and remaining gaps:
+  [docs/production/evidence.md](docs/production/evidence.md).
 
 See [docs/production/README.md](docs/production/README.md) for the index and exact
 commands. Do not label a build “production-ready” until the missing evidence exists.

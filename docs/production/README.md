@@ -10,6 +10,7 @@
 - [驱动矩阵](driver-matrix.md)：18 个环境、门禁/nightly 分层、执行器和报告格式。
 - [发布工程](release.md)：打包、SHA256SUMS、manifest、签名/公证占位与发布后复验。
 - [长期维护](maintenance.md)：驱动季度复核、上游跟进、triage、回滚演练与责任人占位。
+- [验证证据](evidence.md)：Linux/Windows 构建、Windows 运行时、测试门禁与 macOS runner 状态。
 
 ## 关键入口
 
@@ -36,8 +37,9 @@ python tools/release/verify_release.py --release-dir <dir>
 
 ## 当前验证边界
 
-- 已做：Python 语法检查、workflow 静态校验、矩阵/迁移/黄金 manifest 生成、崩溃监控 unittest、发布合成产物 dry-run/apply/verify。
-- 未做：真实 CMake 构建、三平台 CI 首跑、EEVEE GPU 渲染、真实 GPU/驱动矩阵、真实崩溃 dump、Windows 签名、macOS notarization。
-- 在完成这些之前，不应把本分支产物标记为“稳定生产版”。
+- 已做：Linux/Windows 真实 release 构建；Windows 上 13 个 Goo 节点、EEVEE 渲染、shadow-ID、4 个 Goo 测试 wrapper、迁移 fixture、RT 关闭/切换实测；workflow/矩阵/manifest 静态校验；crashmon unittest；发布合成产物校验。
+- macOS：源码编译成功（run `45344327291`），但 hosted runner 连续 5 次排队 15 分钟后取消，当前没有 macOS artifact；`macos-14` 已不可用。
+- 未做：一次三平台全绿 CI、CMake/CTest 下真实 `ctest -L goo`、真实 GPU/驱动矩阵、真实崩溃 dump、Windows 签名、macOS notarization、安装包/更新/回滚。
+- 在完成这些之前，不应把本分支产物标记为“稳定生产版”。详见 [evidence.md](evidence.md)。
 
 生产分支：`production/5.2`。构建 workflow：`.github/workflows/production-build.yml`（PR 需 `ci:build` 标签才会进入重型构建）。
