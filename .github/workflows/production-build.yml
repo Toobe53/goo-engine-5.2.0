@@ -66,7 +66,7 @@ jobs:
       matrix:
         include:
           - name: macos-arm64
-            os: macos-26
+            os: macos-14
             libdir: macos_arm64
             # Same command-line override rule as Linux: the build tree is build_dir.
             build_dir: build-macos-arm64
@@ -134,7 +134,7 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: '1'
         run: |
           set -euo pipefail
-          # Xcode 16+ with Apple Clang 17+ is preinstalled on macos-26 runners.
+          # Xcode 16+ with Apple Clang 17+ is preinstalled on macos-14 runners.
           brew install cmake ninja ccache git-lfs
           xcode-select -p
           clang --version | head -n 1
