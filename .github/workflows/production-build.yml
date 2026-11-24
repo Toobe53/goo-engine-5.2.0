@@ -301,10 +301,27 @@ jobs:
           # LFS pull, which is not needed to compile.
           # --no-lfs-fallback: do not add/fetch Blender's main-repo LFS fallback
           # remote; the lib submodules fetch LFS from their own origins.
-          python build_files/utils/make_update.py \
-            --no-blender \
-            --no-lfs-fallback \
-            --git-command git 2>&1 | tee ci-logs/update.log
+          #
+          # projects.blender.org occasionally returns a transient HTTP 403 for
+          # the lib submodule clone. Retry with a clean submodule directory
+          # instead of failing the whole build on one bad request.
+          status=1
+          for attempt in 1 2 3; do
+            echo "=== make_update attempt ${attempt} ===" | tee -a ci-logs/update.log
+            if python build_files/utils/make_update.py \
+              --no-blender \
+              --no-lfs-fallback \
+              --git-command git 2>&1 | tee -a ci-logs/update.log; then
+              status=0
+              break
+            fi
+            rm -rf "lib/${{ matrix.libdir }}"
+            sleep $((attempt * 30))
+          done
+          if [ "${status}" -ne 0 ]; then
+            echo "make_update.py failed after 3 attempts" >&2
+            exit 1
+          fi
 
       - name: Fetch precompiled libraries (make update, non-interactive)
         if: runner.os == 'Windows'
