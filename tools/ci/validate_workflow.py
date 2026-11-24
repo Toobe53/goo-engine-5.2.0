@@ -475,20 +475,19 @@ def validate_workflow_data(data: Any, raw_text: str) -> _Report:
 
     matrix = _as_dict(strategy.get("matrix"))
     include = _as_list(matrix.get("include"))
-    report.check("matrix uses three explicit include entries", len(include) == 3, f"count={len(include)}")
+    report.check("matrix uses two explicit include entries", len(include) == 2, f"count={len(include)}")
 
     entries = [entry for entry in include if isinstance(entry, dict)]
     names = [entry.get("name") for entry in entries]
     report.check(
-        "matrix covers windows-x64, linux-x64 and macos-arm64",
-        set(names) == {"windows-x64", "linux-x64", "macos-arm64"},
+        "matrix covers windows-x64 and linux-x64 (macOS out of scope)",
+        set(names) == {"windows-x64", "linux-x64"},
         f"names={names!r}",
     )
 
     expected_os = {
         "windows-x64": ("windows", "windows_x64"),
         "linux-x64": ("ubuntu", "linux_x64"),
-        "macos-arm64": ("macos", "macos_arm64"),
     }
     for entry in entries:
         name = entry.get("name")
@@ -589,8 +588,9 @@ def validate_workflow_data(data: Any, raw_text: str) -> _Report:
         any("builddir" in _step_run(step) for step in windows_builds),
     )
     report.check(
-        "macOS release build is gated to runner.os == 'macOS'",
-        any("macOS" in _step_if(step) for step in unix_builds),
+        "no macOS release build step remains in scope",
+        not any("macOS" in _step_if(step) for step in unix_builds),
+        "macOS builds must not be part of the Windows/Linux delivery",
     )
     build_steps = unix_builds + windows_builds
     report.check(
@@ -642,8 +642,8 @@ def validate_workflow_data(data: Any, raw_text: str) -> _Report:
         "self-hosted" in raw_text.lower() and "driver matrix" in raw_text.lower(),
     )
     report.check(
-        "documents that the workflow has not been executed yet",
-        re.search(r"\bnot\s+been\s+executed\b", raw_text, re.IGNORECASE) is not None,
+        "documents macOS is out of scope and hosted CI is not the acceptance gate",
+        "macOS is out of scope" in raw_text and "not the acceptance gate" in raw_text,
     )
 
     return report

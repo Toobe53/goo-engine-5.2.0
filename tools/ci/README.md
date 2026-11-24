@@ -5,16 +5,15 @@ probes for the GOO Engine 5.2 LTS branch (`production/5.2`).
 
 | File | Purpose |
 | --- | --- |
-| `../../.github/workflows/production-build.yml` | GitHub Actions workflow: three-platform release build matrix |
+| `../../.github/workflows/production-build.yml` | GitHub Actions workflow: Windows/Linux release build matrix (macOS out of scope) |
 | `validate_workflow.py` | Stdlib-only static checker for the workflow (triggers, matrix, gating, caches, uploads) |
 | `build_probe.py` | Stdlib-only JSON probe of local build prerequisites; never runs a real build |
 | `local_gate.py` | Local release gate: compile, tests, workflow/matrix validation, bundle verification |
 | `README.md` | This document |
 
 > **Honesty note.** The workflow has run on GitHub-hosted runners: the Linux and
-> Windows `Build release` jobs passed and produced artifacts, but a complete
-> three-platform green run was never obtained because the macOS job was
-> repeatedly canceled while queued. macOS is out of scope for this delivery.
+> Windows `Build release` jobs passed and produced artifacts. macOS is out of
+> scope for this delivery, so the workflow now targets Windows/Linux only.
 > Hosted CI is therefore **not** the acceptance gate here; use
 > `tools/ci/local_gate.py` plus the local build/test evidence. Runner-image drift
 > (apt package names, MSVC version) remains the most likely source of CI failure.
@@ -83,12 +82,11 @@ One job, `strategy.fail-fast: false`, 180-minute job timeout:
 | Name | Runner | Precompiled libs | Build directory | Uploaded artifact |
 | --- | --- | --- | --- | --- |
 | `windows-x64` | `windows-2022` | `lib/windows_x64` | `build-windows-x64` | `goo-engine-windows-x64` |
-| `linux-x64` | `ubuntu-24.04` | `lib/linux_x64` | `build-linux-x64_release` | `goo-engine-linux-x64` |
-| `macos-arm64` | `macos-15` | `lib/macos_arm64` | `build-macos-arm64_release` | `goo-engine-macos-arm64` |
+| `linux-x64` | `ubuntu-24.04` | `lib/linux_x64` | `build-linux-x64` | `goo-engine-linux-x64` |
 
-The `_release` suffix on Unix is added by the `GNUmakefile` `release` target
-itself; `matrix.out_dir` names the real output directory so cache and artifact
-paths stay correct.
+The build tree is exactly `matrix.build_dir`: passing `BUILD_DIR=...` on the
+`make` command line suppresses the `GNUmakefile` `_release` suffix. macOS is not
+part of the matrix.
 
 ### Steps
 
@@ -185,13 +183,13 @@ matrix (see below).
   the self-hosted driver matrix workstream (its documentation lives in
   `docs/production/driver-matrix.md`; tooling under `tools/driver_matrix/`).
 * **No packaging, signing or notarization.** Artifacts are the raw
-  `<out_dir>/bin/**` trees. Installers, `.app` bundles, DMG/zip packaging and
-  code signing stay out of this skeleton.
-* **Hosted runs are not a green three-platform gate.** Linux and Windows
-  `Build release` jobs passed and uploaded artifacts; the macOS job was
-  canceled while queued, so the overall workflow remains non-green. Use
-  `tools/ci/local_gate.py` and the local evidence for acceptance; treat this
-  workflow as a reproducible build harness, not as the release gate.
+  `<out_dir>/bin/**` trees. Installers and code signing stay out of this
+  skeleton.
+* **Hosted runs are not the acceptance gate.** Linux and Windows
+  `Build release` jobs passed and uploaded artifacts. macOS is out of scope and
+  has been removed from this workflow. Use `tools/ci/local_gate.py` and the local
+  evidence for acceptance; treat this workflow as a reproducible build harness,
+  not as the release gate.
 * **Windows update path.** `make.bat update` is interactive on a fresh
   checkout, which is why the workflow calls `make_update.py` directly.
   Developers on Windows who run `make.bat update` interactively are fine;
@@ -230,16 +228,15 @@ With Python 3.12 (no third-party packages in the repository):
 
 ```text
 python -m py_compile tools/ci/build_probe.py tools/ci/validate_workflow.py  -> exit 0
-python tools/ci/validate_workflow.py                                      -> 68 checks passed, 0 failed
+python tools/ci/validate_workflow.py                                      -> 60 checks passed, 0 failed
 python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1          -> 7 passed, 0 failed
 build_probe.py --text (this Windows host, no cmake/ninja/git)             -> exit 1, NOT READY (expected)
 build_probe.py --repo-root <non-checkout>                                 -> exit 2 (expected)
 ```
 
 Hosted run `45384517223` (head `9d4dce4e`) built Linux x64 and Windows x64
-release artifacts successfully; the macOS arm64 job was canceled after waiting
-in the runner queue. That run is the source of the Windows runtime evidence, not
-a three-platform green CI result. In addition, during development the workflow
+release artifacts successfully. That run is the source of the Windows runtime
+evidence, not a release gate. In addition, during development the workflow
 was parsed with PyYAML installed into a throwaway temporary directory (never
 into the repo) and the built-in parser's output for every step, trigger and
 matrix entry matched PyYAML exactly. Five mutations of the workflow (missing

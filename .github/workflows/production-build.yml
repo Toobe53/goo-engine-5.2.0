@@ -1,10 +1,11 @@
 # Production source-build matrix for GOO Engine (Blender 5.2 LTS port).
 #
 # HONESTY / SCOPE
-# - This workflow is a CI skeleton: it compiles the three supported desktop targets
-#   from source and uploads logs + build output. It has NOT been executed on
-#   GitHub-hosted runners from this repository yet. Treat the first run as a smoke
-#   test, not as proof that release binaries are reproducible or complete.
+# - Windows x64 and Linux x64 only. macOS is out of scope for this delivery;
+#   its history is recorded in the production docs but it is not a gate.
+# - This workflow compiles both supported desktop targets from source and uploads
+#   logs + build output. Hosted CI is a build harness, not the acceptance gate:
+#   use tools/ci/local_gate.py plus the local evidence.
 # - GitHub-hosted runners have NO GPU. This workflow therefore does not run EEVEE
 #   or Cycles render regressions and does not assert runtime rendering
 #   correctness. GPU/driver regressions belong to the self-hosted driver matrix
@@ -61,7 +62,7 @@ jobs:
     # download and MSVC/Ninja linking. Hosted runners may still be slower.
     timeout-minutes: 180
     strategy:
-      # One platform failing must not cancel the other two.
+      # One platform failing must not cancel the other.
       fail-fast: false
       matrix:
         include:
@@ -80,13 +81,6 @@ jobs:
             build_dir: build-linux-x64
             out_dir: build-linux-x64
             artifact: goo-engine-linux-x64
-          - name: macos-arm64
-            os: macos-15
-            libdir: macos_arm64
-            # Same command-line override rule as Linux: the build tree is build_dir.
-            build_dir: build-macos-arm64
-            out_dir: build-macos-arm64
-            artifact: goo-engine-macos-arm64
     steps:
       - name: Checkout source (submodules fetched later by make_update.py)
         uses: actions/checkout@v4
@@ -141,23 +135,6 @@ jobs:
           g++-14 --version | head -n 1
           cmake --version | head -n 1
           ninja --version
-
-      - name: Install build dependencies (macOS)
-        if: runner.os == 'macOS'
-        shell: bash
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: '1'
-        run: |
-          set -euo pipefail
-          # Xcode 16+ with Apple Clang 17+ is preinstalled on macos-15 runners.
-          brew install cmake ninja ccache git-lfs
-          xcode-select -p
-          clang --version | head -n 1
-          clang_major="$(clang --version | head -n 1 | sed -E 's/.*version ([0-9]+)\..*/\1/')"
-          if [ -z "${clang_major}" ] || [ "${clang_major}" -lt 17 ]; then
-            echo "Apple Clang 17.0 or newer is required (Blender 5.2); found: ${clang_major}" >&2
-            exit 1
-          fi
 
       - name: Verify build dependencies (Windows)
         if: runner.os == 'Windows'
@@ -263,7 +240,7 @@ jobs:
 
       # Windows builds do not use ccache here: make.bat supports sccache, but the
       # hosted image does not ship it and enabling it is left to a follow-up.
-      - name: Cache ccache (Linux/macOS)
+      - name: Cache ccache (Linux)
         if: runner.os != 'Windows'
         uses: actions/cache@v4
         with:
@@ -341,14 +318,6 @@ jobs:
         env:
           CC: gcc-14
           CXX: g++-14
-        run: |
-          set -euo pipefail
-          mkdir -p ci-logs
-          make release ninja ccache BUILD_DIR="${{ github.workspace }}/${{ matrix.build_dir }}" 2>&1 | tee ci-logs/build.log
-
-      - name: Build release (macOS)
-        if: runner.os == 'macOS'
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p ci-logs
