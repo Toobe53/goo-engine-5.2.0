@@ -1,0 +1,19 @@
+command: /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend opengl -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_opengl_ -F PNG -f 1
+status: passed
+reason: None
+exit_code: 0
+
+$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend opengl -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_opengl_ -F PNG -f 1
+Blender 5.2.1 LTS
+00:00.337  render           | Rendering single frame
+00:00.337  render           | Rendering frame 1
+00:00.337  render           | Start rendering: Scene, ViewLayer
+00:00.337  render           | Engine: EEVEE
+00:00.622  render           | Fra: 1 | Rendering 1 / 64 samples
+00:00.780  render           | Fra: 1 | Rendering 25 / 64 samples
+00:00.906  render           | Fra: 1 | Rendering 50 / 64 samples
+00:00.975  render           | Fra: 1 | Rendering 64 / 64 samples
+00:01.249  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_opengl_0001.png'
+00:01.249  render           | Time: 00:00.91 (Saving: 00:00.24)
+
+Blender quit

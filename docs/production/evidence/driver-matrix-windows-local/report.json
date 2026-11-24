@@ -1,0 +1,389 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-24T17:53:27Z",
+  "matrix": {
+    "path": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\tools\\driver_matrix\\matrix.json",
+    "schema_version": "1.0",
+    "project": {
+      "name": "Goo Engine",
+      "version": "5.2.0",
+      "branch": "production/5.2"
+    },
+    "environments_total": 19
+  },
+  "host": {
+    "schema_version": "1.0",
+    "tool": "tools/driver_matrix/detect.py",
+    "collected_at": "2026-11-24T17:53:05Z",
+    "host": {
+      "hostname": "sb",
+      "os": {
+        "family": "windows",
+        "name": "Windows 11",
+        "release": "11",
+        "version": "10.0.26200",
+        "build": "26200",
+        "kernel": "10.0.26200",
+        "arch": "x64",
+        "is_wsl": false,
+        "edition": "CoreCountrySpecific"
+      },
+      "arch": "x64",
+      "python": "3.13.13",
+      "machine": "AMD64"
+    },
+    "ci": {
+      "detected": false,
+      "provider": null,
+      "runner_name": null,
+      "runner_os": null,
+      "workflow": null,
+      "job": null,
+      "github_hosted": false
+    },
+    "display_server": "windows",
+    "gpus": [
+      {
+        "name": "OrayIddDriver Device",
+        "vendor": "unknown",
+        "kind": "virtual",
+        "driver_version": "17.50.19.949",
+        "driver_scheme": null,
+        "driver_normalized": "17.50.19.949",
+        "device_id": "ROOT\\DISPLAY\\0000",
+        "source": "Win32_VideoController",
+        "is_primary": false,
+        "is_virtual": true,
+        "is_software": false,
+        "index": 0
+      },
+      {
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": "intel",
+        "kind": "integrated",
+        "driver_version": "31.0.101.5590",
+        "driver_scheme": "intel-windows-raw",
+        "driver_normalized": "31.0.101.5590",
+        "device_id": "PCI\\VEN_8086&DEV_46A6&SUBSYS_11BD1043&REV_0C\\3&11583659&0&10",
+        "source": "Win32_VideoController",
+        "is_primary": true,
+        "is_virtual": false,
+        "is_software": false,
+        "index": 1
+      }
+    ],
+    "primary_gpu": {
+      "name": "Intel(R) Iris(R) Xe Graphics",
+      "vendor": "intel",
+      "kind": "integrated",
+      "driver_version": "31.0.101.5590",
+      "driver_scheme": "intel-windows-raw",
+      "driver_normalized": "31.0.101.5590",
+      "device_id": "PCI\\VEN_8086&DEV_46A6&SUBSYS_11BD1043&REV_0C\\3&11583659&0&10",
+      "source": "Win32_VideoController",
+      "is_primary": true,
+      "is_virtual": false,
+      "is_software": false,
+      "index": 1
+    },
+    "drivers": {
+      "intel": {
+        "version": "31.0.101.5590",
+        "raw_version": "31.0.101.5590",
+        "scheme": "intel-windows-raw",
+        "source": "Win32_VideoController"
+      }
+    },
+    "backends": {
+      "opengl": {
+        "available": true,
+        "version": null,
+        "renderer": null,
+        "source": "opengl32.dll",
+        "deprecated": false,
+        "notes": [
+          "OpenGL version requires a live context; run the smoke probe to confirm 4.3+."
+        ]
+      },
+      "vulkan": {
+        "available": true,
+        "version": null,
+        "icd_count": 0,
+        "icds": [],
+        "loader": "C:\\WINDOWS\\System32\\vulkan-1.dll",
+        "source": "vulkan-1.dll (system or binary directory) + registry",
+        "notes": [
+          "no machine-wide Vulkan ICD registered; relying on the bundled loader/driver (smoke probe authoritative)."
+        ]
+      },
+      "metal": {
+        "available": false,
+        "version": null,
+        "source": null,
+        "notes": [
+          "Metal is macOS only."
+        ]
+      }
+    },
+    "warnings": [
+      "ignored virtual display adapter(s): OrayIddDriver Device"
+    ],
+    "errors": []
+  },
+  "selection": {
+    "matched": [
+      "win11-intel"
+    ],
+    "skipped": [
+      {
+        "id": "win10-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win10-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win10-intel-igpu",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win11-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win11-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-22.04-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-22.04-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-22.04-intel",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "debian-13-nvidia-gtx1660",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-intel",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-nvidia-wayland",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-amd-wayland",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-14-apple-metal",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-15-apple-metal",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-14-apple-opengl",
+        "tier": "advisory",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-15-intel-amd-metal",
+        "tier": "advisory",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      }
+    ]
+  },
+  "driver_conformance": [
+    {
+      "entry_id": "win11-intel",
+      "vendor": "intel",
+      "scheme": "intel-windows-raw",
+      "host_version": "31.0.101.5590",
+      "host_raw_version": "31.0.101.5590",
+      "minimum_version": "31.0.101.5186",
+      "minimum_display": "Intel Windows 31.0.101.5186",
+      "status": "met",
+      "source": "Intel(R) Iris(R) Xe Graphics"
+    }
+  ],
+  "environment": {
+    "repo_root": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0",
+    "out_dir": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6",
+    "goo_binary": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe",
+    "binary_candidates_checked": [
+      "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe"
+    ],
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "runs": [
+    {
+      "entry_id": "win11-intel",
+      "test_set": "smoke-opengl",
+      "backend": "opengl",
+      "command": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend opengl --python-exit-code 1 --python C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend opengl --json-out C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/probe-win11-intel-opengl.json",
+      "required": true,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 10.201,
+      "started_at": "2026-11-24T17:53:05Z",
+      "finished_at": "2026-11-24T17:53:15Z",
+      "stdout_tail": "$ C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend opengl --python-exit-code 1 --python C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend opengl --json-out C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/probe-win11-intel-opengl.json\nBlender 5.2.1 LTS\n00:00.141  system.path      | WARNING Could not generate a temp file name for 'C:\\Users\\zbq\\AppData\\Local\\Temp\\blender_a22364'\n00:00.141  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\\Users\\zbq\\AppData\\Local\\Temp\\'\n00:08.656  system.path      | WARNING Could not generate a temp file name for 'C:\\Users\\zbq\\AppData\\Local\\Temp\\blender_a22364'\n00:08.656  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\\Users\\zbq\\AppData\\Local\\Temp\\'\n00:09.937  render           | Saved: 'C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\renders\\probe-render-opengl-blender_workbench.png'\nExtensions: writing cache failed ([Errno 13] Permission denied: 'C:\\\\Users\\\\zbq\\\\AppData\\\\Roaming\\\\Blender Foundation\\\\Blender\\\\5.2\\\\extensions\\\\.cache\\\\compat.dat').\ngpu-probe: expected=opengl detected=opengl match=True render=True\ngpu-probe: vendor=Intel renderer=Intel(R) Iris(R) Xe Graphics version=4.6.0 - Build 31.0.101.5590\n\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\n",
+      "stderr_tail": "Vendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\n",
+      "log": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\logs\\win11-intel__smoke-opengl__opengl.log",
+      "missing_artifacts": []
+    },
+    {
+      "entry_id": "win11-intel",
+      "test_set": "smoke-vulkan",
+      "backend": "vulkan",
+      "command": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/probe-win11-intel-vulkan.json",
+      "required": true,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 1.17,
+      "started_at": "2026-11-24T17:53:15Z",
+      "finished_at": "2026-11-24T17:53:16Z",
+      "stdout_tail": "$ C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/probe-win11-intel-vulkan.json\nBlender 5.2.1 LTS\n00:00.078  system.path      | WARNING Could not generate a temp file name for 'C:\\Users\\zbq\\AppData\\Local\\Temp\\blender_a21004'\n00:00.078  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\\Users\\zbq\\AppData\\Local\\Temp\\'\n00:00.609  system.path      | WARNING Could not generate a temp file name for 'C:\\Users\\zbq\\AppData\\Local\\Temp\\blender_a21004'\n00:00.609  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\\Users\\zbq\\AppData\\Local\\Temp\\'\n00:00.953  render           | Saved: 'C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\renders\\probe-render-vulkan-blender_workbench.png'\nExtensions: writing cache failed ([Errno 13] Permission denied: 'C:\\\\Users\\\\zbq\\\\AppData\\\\Roaming\\\\Blender Foundation\\\\Blender\\\\5.2\\\\extensions\\\\.cache\\\\compat.dat').\ngpu-probe: expected=vulkan detected=vulkan match=True render=True\ngpu-probe: vendor=Intel Corporation renderer=Intel(R) Iris(R) Xe Graphics version=Intel Corporation 101.5590\n",
+      "stderr_tail": "",
+      "log": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\logs\\win11-intel__smoke-vulkan__vulkan.log",
+      "missing_artifacts": []
+    },
+    {
+      "entry_id": "win11-intel",
+      "test_set": "render-eevee",
+      "backend": "opengl",
+      "command": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend opengl -o C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/render_win11-intel_opengl_ -F PNG -f 1",
+      "required": false,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 4.496,
+      "started_at": "2026-11-24T17:53:16Z",
+      "finished_at": "2026-11-24T17:53:21Z",
+      "stdout_tail": "$ C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend opengl -o C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/render_win11-intel_opengl_ -F PNG -f 1\nBlender 5.2.1 LTS\n00:00.078  system.path      | WARNING Could not generate a temp file name for 'C:\\Users\\zbq\\AppData\\Local\\Temp\\blender_a11336'\n00:00.078  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\\Users\\zbq\\AppData\\Local\\Temp\\'\n00:00.453  render           | Rendering single frame\n00:00.453  render           | Rendering frame 1\n00:00.453  render           | Start rendering: Scene, ViewLayer\n00:00.453  render           | Engine: EEVEE\n00:01.703  render           | Fra: 1 | Rendering 1 / 64 samples\n00:02.391  render           | Fra: 1 | Rendering 25 / 64 samples\n00:03.094  render           | Fra: 1 | Rendering 50 / 64 samples\n00:03.500  render           | Fra: 1 | Rendering 64 / 64 samples\n00:04.203  render           | Saved: 'C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\render_win11-intel_opengl_0001.png'\n00:04.203  render           | Time: 00:03.75 (Saving: 00:00.49)\n\nBlender quit\n\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\n",
+      "stderr_tail": "Vendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\nVendor: Intel\nRenderer: Intel(R) Iris(R) Xe Graphics\nVersion: 4.6.0 - Build 31.0.101.5590\nContext Version: 4.6\n",
+      "log": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\logs\\win11-intel__render-eevee__opengl.log",
+      "missing_artifacts": []
+    },
+    {
+      "entry_id": "win11-intel",
+      "test_set": "render-eevee",
+      "backend": "vulkan",
+      "command": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend vulkan -o C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/render_win11-intel_vulkan_ -F PNG -f 1",
+      "required": false,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 5.762,
+      "started_at": "2026-11-24T17:53:21Z",
+      "finished_at": "2026-11-24T17:53:27Z",
+      "stdout_tail": "$ C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe --background --factory-startup --gpu-backend vulkan -o C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6/render_win11-intel_vulkan_ -F PNG -f 1\nBlender 5.2.1 LTS\n00:00.078  system.path      | WARNING Could not generate a temp file name for 'C:\\Users\\zbq\\AppData\\Local\\Temp\\blender_a16288'\n00:00.078  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\\Users\\zbq\\AppData\\Local\\Temp\\'\n00:00.500  render           | Rendering single frame\n00:00.500  render           | Rendering frame 1\n00:00.500  render           | Start rendering: Scene, ViewLayer\n00:00.500  render           | Engine: EEVEE\n00:03.453  render           | Fra: 1 | Rendering 1 / 64 samples\n00:03.969  render           | Fra: 1 | Rendering 25 / 64 samples\n00:04.500  render           | Fra: 1 | Rendering 50 / 64 samples\n00:04.781  render           | Fra: 1 | Rendering 64 / 64 samples\n00:05.297  render           | Saved: 'C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\render_win11-intel_vulkan_0001.png'\n00:05.312  render           | Time: 00:04.79 (Saving: 00:00.46)\n\nBlender quit\n",
+      "stderr_tail": "",
+      "log": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\logs\\win11-intel__render-eevee__vulkan.log",
+      "missing_artifacts": []
+    }
+  ],
+  "summary": {
+    "runs_total": 4,
+    "passed": 4,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "required_runs": 2,
+    "required_failures": 0,
+    "optional_failures": 0,
+    "driver_failures": 0,
+    "verdict": "pass"
+  }
+}

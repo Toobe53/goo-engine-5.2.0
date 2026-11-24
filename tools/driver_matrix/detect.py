@@ -721,8 +721,20 @@ def detect_backends(os_info: dict, gpus: list, warnings: list) -> dict:
     }
     try:
         if IS_WINDOWS:
-            dll = os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32", "vulkan-1.dll")
-            vulkan["loader"] = dll if os.path.exists(dll) else None
+            search_dirs = [
+                os.path.join(os.environ.get("SystemRoot", r"C:\Windows"), "System32"),
+                os.path.dirname(sys.executable),
+            ]
+            binary = os.environ.get("GOO_BINARY") or os.environ.get("GOO_DRIVER_MATRIX_BINARY")
+            if binary:
+                search_dirs.insert(0, os.path.dirname(os.path.abspath(binary)))
+            loader = None
+            for directory in search_dirs:
+                candidate = os.path.join(directory, "vulkan-1.dll")
+                if os.path.exists(candidate):
+                    loader = candidate
+                    break
+            vulkan["loader"] = loader
             icds = []
             try:
                 import winreg  # noqa: PLC0415 - Windows only
@@ -743,10 +755,18 @@ def detect_backends(os_info: dict, gpus: list, warnings: list) -> dict:
                 icds.extend(part for part in re.split(r"[;:]", env_icd) if part)
             vulkan["icds"] = icds
             vulkan["icd_count"] = len(icds)
-            vulkan["available"] = bool(vulkan["loader"]) and (bool(icds) or bool(env_icd))
-            vulkan["source"] = "vulkan-1.dll + registry"
+            # Blender ships its own loader next to the binary and may use a
+            # driver ICD that is not registered machine-wide. Presence of the
+            # loader is enough for the detector; the smoke probe is the
+            # authoritative check that a device is actually usable.
+            vulkan["available"] = bool(vulkan["loader"])
+            vulkan["source"] = "vulkan-1.dll (system or binary directory) + registry"
             if not vulkan["loader"]:
                 vulkan["notes"].append("vulkan-1.dll is missing; install the Vulkan runtime.")
+            elif not icds and not env_icd:
+                vulkan["notes"].append(
+                    "no machine-wide Vulkan ICD registered; relying on the bundled loader/driver (smoke probe authoritative)."
+                )
         elif IS_LINUX:
             loader = ctypes.util.find_library("vulkan")
             icds = []

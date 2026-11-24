@@ -76,16 +76,17 @@ Production Hardening Status
 The `production/5.2` branch adds CI, CTest registration, crash capture, driver-matrix
 and release-engineering scaffolding. It is intentionally honest about evidence:
 
-- **Verified:** Linux and Windows release builds from CI run `45384517223`
-  (commit `9d4dce4e`); Windows startup, all 13 Goo nodes, EEVEE 64x64 render,
-  shadow-ID render, and the four Goo test wrappers on the built Windows binary.
-  macOS compiled successfully in run `45344327291`, but no macOS artifact was
-  produced.
-- **Not yet verified:** one all-three-green CI run with a macOS artifact, a real
-  `ctest -L goo` execution under CMake, GPU/driver matrix rows, real crash dumps,
-  Windows signing, or macOS notarization.
+- **Verified:** Windows 11 + Iris Xe local lite build (`7050/7050` targets, clean
+  `cmake --install`, installed `blender.exe --version` = 5.2.1 LTS), 13 Goo nodes,
+  EEVEE 64x64 and shadow-ID renders, and `ctest -L goo` 8 tests (7 pass, 1 skip);
+  Debian 13 + GTX 1660 local release build (`7450/7450` targets), the same runtime
+  checks and Goo tests; a real 4/4 driver-matrix pass on each of those two hosts.
+- **Not yet verified:** the remaining 17 driver-matrix rows, real crash dumps,
+  Windows signing, or installer/update/rollback. macOS is out of scope by request.
 - Exact runs, test counts and remaining gaps:
-  [docs/production/evidence.md](docs/production/evidence.md).
+  [Windows evidence](docs/production/evidence-windows-local.md),
+  [Linux evidence](docs/production/evidence-linux-local.md) and
+  [CI evidence](docs/production/evidence.md).
 
 See [docs/production/README.md](docs/production/README.md) for the index and exact
 commands. Do not label a build “production-ready” until the missing evidence exists.

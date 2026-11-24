@@ -168,7 +168,18 @@ def run_render(size: int, out_dir: Path, entry_id: str) -> dict:
     return result
 
 
+def json_default(value):
+    if isinstance(value, (bytes, bytearray)):
+        return bytes(value).decode("utf-8", "replace")
+    return repr(value)
+
+
 def main(argv=None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+        # Blender keeps its own options in sys.argv; script arguments follow `--`.
+        if "--" in argv:
+            argv = argv[argv.index("--") + 1:]
     args = parse_args(argv)
     out_path = Path(args.json_out).expanduser()
     probe = {
@@ -182,8 +193,6 @@ def main(argv=None) -> int:
             "python": sys.version,
         },
         "app": collect_app_info(),
-        "gpu": collect_gpu_info(),
-        "preferences_gpu_backend": collect_preferences_backend(),
         "expected_backend": args.expect_backend,
         "detected_backend": None,
         "backend_match": False,
@@ -192,16 +201,9 @@ def main(argv=None) -> int:
         "warnings": [],
     }
 
-    detected = normalize_backend(probe["gpu"].get("backend_type")) if probe["gpu"] else None
-    if not detected:
-        detected = normalize_backend(probe.get("preferences_gpu_backend"))
-    probe["detected_backend"] = detected
-    probe["backend_match"] = detected == args.expect_backend
-    if not detected:
-        probe["warnings"].append("application did not report an active GPU backend")
-    elif not probe["backend_match"]:
-        probe["errors"].append("active backend %r does not match expected %r" % (detected, args.expect_backend))
-
+    # The GPU module is not initialized until the application has drawn or
+    # rendered something. Probe the backend *after* the render so that
+    # --gpu-backend fallbacks are visible instead of the stored preference.
     if args.skip_render:
         probe["render"] = {"attempted": False, "ok": None, "skipped": True}
     else:
@@ -212,11 +214,23 @@ def main(argv=None) -> int:
         if not probe["render"].get("ok"):
             probe["errors"].append("render failed: %s" % (probe["render"].get("error") or "unknown error"))
 
+    probe["gpu"] = collect_gpu_info()
+    probe["preferences_gpu_backend"] = collect_preferences_backend()
+    detected = normalize_backend(probe["gpu"].get("backend_type")) if probe["gpu"] else None
+    if not detected:
+        detected = normalize_backend(probe.get("preferences_gpu_backend"))
+    probe["detected_backend"] = detected
+    probe["backend_match"] = detected == args.expect_backend
+    if not detected:
+        probe["warnings"].append("application did not report an active GPU backend")
+    elif not probe["backend_match"]:
+        probe["errors"].append("active backend %r does not match expected %r" % (detected, args.expect_backend))
+
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         tmp_path = out_path.with_suffix(out_path.suffix + ".tmp")
         with open(tmp_path, "w", encoding="utf-8") as fh:
-            json.dump(probe, fh, indent=2, ensure_ascii=False)
+            json.dump(probe, fh, indent=2, ensure_ascii=False, default=json_default)
             fh.write("\n")
         os.replace(tmp_path, out_path)
         probe["json_out"] = str(out_path)

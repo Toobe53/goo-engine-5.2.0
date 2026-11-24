@@ -918,6 +918,11 @@ def main(argv=None) -> int:
         if host_detect is None:
             print("error: cannot import detect.py next to run_matrix.py: %s" % _DETECT_IMPORT_ERROR, file=sys.stderr)
             return 2
+        # Let the host detector see Blender's bundled Vulkan loader before it
+        # runs; the binary path is otherwise only resolved further below.
+        explicit_binary = args.binary or os.environ.get("GOO_BINARY")
+        if explicit_binary:
+            os.environ["GOO_DRIVER_MATRIX_BINARY"] = str(Path(explicit_binary).expanduser().resolve())
         host = host_detect.detect_host()
 
     repo_root = matrix_path.resolve().parent.parent.parent

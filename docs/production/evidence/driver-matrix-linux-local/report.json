@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-24T17:51:57Z",
+  "matrix": {
+    "path": "/home/zbq/goo-work/goo-engine/tools/driver_matrix/matrix.json",
+    "schema_version": "1.0",
+    "project": {
+      "name": "Goo Engine",
+      "version": "5.2.0",
+      "branch": "production/5.2"
+    },
+    "environments_total": 19
+  },
+  "host": {
+    "schema_version": "1.0",
+    "tool": "tools/driver_matrix/detect.py",
+    "collected_at": "2026-11-24T17:51:53Z",
+    "host": {
+      "hostname": "matia-home",
+      "os": {
+        "family": "linux",
+        "name": "Debian GNU/Linux 13 (trixie)",
+        "release": "13",
+        "version": "Debian GNU/Linux 13 (trixie)",
+        "build": "",
+        "kernel": "6.12.113+deb13-amd64",
+        "arch": "x64",
+        "is_wsl": false
+      },
+      "arch": "x64",
+      "python": "3.13.5",
+      "machine": "x86_64"
+    },
+    "ci": {
+      "detected": false,
+      "provider": null,
+      "runner_name": null,
+      "runner_os": null,
+      "workflow": null,
+      "job": null,
+      "github_hosted": false
+    },
+    "display_server": null,
+    "gpus": [
+      {
+        "name": "NVIDIA Corporation TU116 [GeForce GTX 1660] [10de:2184] (rev a1)",
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "driver_version": "550.163.01",
+        "driver_scheme": "nvidia-linux",
+        "driver_normalized": "550.163.01",
+        "device_id": "10de:2184",
+        "source": "sysfs:drm",
+        "is_primary": true,
+        "is_virtual": false,
+        "is_software": false,
+        "index": 0,
+        "kernel_driver": "nvidia"
+      }
+    ],
+    "primary_gpu": {
+      "name": "NVIDIA Corporation TU116 [GeForce GTX 1660] [10de:2184] (rev a1)",
+      "vendor": "nvidia",
+      "kind": "discrete",
+      "driver_version": "550.163.01",
+      "driver_scheme": "nvidia-linux",
+      "driver_normalized": "550.163.01",
+      "device_id": "10de:2184",
+      "source": "sysfs:drm",
+      "is_primary": true,
+      "is_virtual": false,
+      "is_software": false,
+      "index": 0,
+      "kernel_driver": "nvidia"
+    },
+    "drivers": {
+      "kernel_modules": {
+        "nvidia": "550.163.01"
+      },
+      "nvidia": {
+        "version": "550.163.01",
+        "scheme": "nvidia-linux",
+        "source": "/proc/driver/nvidia/version"
+      }
+    },
+    "backends": {
+      "opengl": {
+        "available": true,
+        "version": null,
+        "renderer": null,
+        "source": null,
+        "deprecated": false,
+        "notes": [
+          "No DISPLAY/WAYLAND_DISPLAY; version probing may be incomplete."
+        ]
+      },
+      "vulkan": {
+        "available": true,
+        "version": null,
+        "icd_count": 8,
+        "icds": [
+          "/usr/share/vulkan/icd.d/gfxstream_vk_icd.json",
+          "/usr/share/vulkan/icd.d/intel_hasvk_icd.json",
+          "/usr/share/vulkan/icd.d/intel_icd.json",
+          "/usr/share/vulkan/icd.d/lvp_icd.json",
+          "/usr/share/vulkan/icd.d/nouveau_icd.json",
+          "/usr/share/vulkan/icd.d/nvidia_icd.json",
+          "/usr/share/vulkan/icd.d/radeon_icd.json",
+          "/usr/share/vulkan/icd.d/virtio_icd.json"
+        ],
+        "loader": "libvulkan.so.1",
+        "source": "libvulkan + ICD manifests",
+        "notes": []
+      },
+      "metal": {
+        "available": false,
+        "version": null,
+        "source": null,
+        "notes": [
+          "Metal is macOS only."
+        ]
+      }
+    },
+    "warnings": [
+      "Mesa/OpenGL version not detected (glxinfo/vulkaninfo unavailable)"
+    ],
+    "errors": []
+  },
+  "selection": {
+    "matched": [
+      "debian-13-nvidia-gtx1660"
+    ],
+    "skipped": [
+      {
+        "id": "win10-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win10-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win10-intel-igpu",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win11-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win11-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "win11-intel",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-22.04-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-22.04-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-22.04-intel",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-nvidia",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-amd",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-intel",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-nvidia-wayland",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "ubuntu-24.04-amd-wayland",
+        "tier": "nightly",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-14-apple-metal",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-15-apple-metal",
+        "tier": "gate",
+        "required": true,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-14-apple-opengl",
+        "tier": "advisory",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      },
+      {
+        "id": "macos-15-intel-amd-metal",
+        "tier": "advisory",
+        "required": false,
+        "reasons": [
+          "filtered by --entry"
+        ]
+      }
+    ]
+  },
+  "driver_conformance": [
+    {
+      "entry_id": "debian-13-nvidia-gtx1660",
+      "vendor": "nvidia",
+      "scheme": "nvidia-linux",
+      "host_version": "550.163.01",
+      "host_raw_version": "550.163.01",
+      "minimum_version": "550.163.01",
+      "minimum_display": "NVIDIA Linux 550.163.01",
+      "status": "met",
+      "source": "NVIDIA Corporation TU116 [GeForce GTX 1660] [10de:2184] (rev a1)"
+    }
+  ],
+  "environment": {
+    "repo_root": "/home/zbq/goo-work/goo-engine",
+    "out_dir": "/home/zbq/goo-work/driver-matrix-linux-20261125c",
+    "goo_binary": "/home/zbq/goo-work/goo-install/blender",
+    "binary_candidates_checked": [
+      "/home/zbq/goo-work/goo-install/blender"
+    ],
+    "python": "3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]",
+    "platform": "Linux-6.12.113+deb13-amd64-x86_64-with-glibc2.41"
+  },
+  "runs": [
+    {
+      "entry_id": "debian-13-nvidia-gtx1660",
+      "test_set": "smoke-opengl",
+      "backend": "opengl",
+      "command": "/home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend opengl --python-exit-code 1 --python /home/zbq/goo-work/goo-engine/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend opengl --json-out /home/zbq/goo-work/driver-matrix-linux-20261125c/probe-debian-13-nvidia-gtx1660-opengl.json",
+      "required": true,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 0.718,
+      "started_at": "2026-11-24T17:51:53Z",
+      "finished_at": "2026-11-24T17:51:54Z",
+      "stdout_tail": "$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend opengl --python-exit-code 1 --python /home/zbq/goo-work/goo-engine/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend opengl --json-out /home/zbq/goo-work/driver-matrix-linux-20261125c/probe-debian-13-nvidia-gtx1660-opengl.json\nBlender 5.2.1 LTS\n00:00.623  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/renders/probe-render-opengl-blender_workbench.png'\ngpu-probe: expected=opengl detected=opengl match=True render=True\ngpu-probe: vendor=NVIDIA Corporation renderer=NVIDIA GeForce GTX 1660/PCIe/SSE2 version=4.6.0 NVIDIA 550.163.01\n",
+      "stderr_tail": "",
+      "log": "/home/zbq/goo-work/driver-matrix-linux-20261125c/logs/debian-13-nvidia-gtx1660__smoke-opengl__opengl.log",
+      "missing_artifacts": []
+    },
+    {
+      "entry_id": "debian-13-nvidia-gtx1660",
+      "test_set": "smoke-vulkan",
+      "backend": "vulkan",
+      "command": "/home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python /home/zbq/goo-work/goo-engine/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out /home/zbq/goo-work/driver-matrix-linux-20261125c/probe-debian-13-nvidia-gtx1660-vulkan.json",
+      "required": true,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 0.823,
+      "started_at": "2026-11-24T17:51:54Z",
+      "finished_at": "2026-11-24T17:51:55Z",
+      "stdout_tail": "$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python /home/zbq/goo-work/goo-engine/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out /home/zbq/goo-work/driver-matrix-linux-20261125c/probe-debian-13-nvidia-gtx1660-vulkan.json\nBlender 5.2.1 LTS\n00:00.722  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/renders/probe-render-vulkan-blender_workbench.png'\ngpu-probe: expected=vulkan detected=vulkan match=True render=True\ngpu-probe: vendor=NVIDIA Corporation renderer=NVIDIA GeForce GTX 1660 version=NVIDIA 550.163.01\n",
+      "stderr_tail": "",
+      "log": "/home/zbq/goo-work/driver-matrix-linux-20261125c/logs/debian-13-nvidia-gtx1660__smoke-vulkan__vulkan.log",
+      "missing_artifacts": []
+    },
+    {
+      "entry_id": "debian-13-nvidia-gtx1660",
+      "test_set": "render-eevee",
+      "backend": "opengl",
+      "command": "/home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend opengl -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_opengl_ -F PNG -f 1",
+      "required": false,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 1.354,
+      "started_at": "2026-11-24T17:51:55Z",
+      "finished_at": "2026-11-24T17:51:56Z",
+      "stdout_tail": "$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend opengl -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_opengl_ -F PNG -f 1\nBlender 5.2.1 LTS\n00:00.337  render           | Rendering single frame\n00:00.337  render           | Rendering frame 1\n00:00.337  render           | Start rendering: Scene, ViewLayer\n00:00.337  render           | Engine: EEVEE\n00:00.622  render           | Fra: 1 | Rendering 1 / 64 samples\n00:00.780  render           | Fra: 1 | Rendering 25 / 64 samples\n00:00.906  render           | Fra: 1 | Rendering 50 / 64 samples\n00:00.975  render           | Fra: 1 | Rendering 64 / 64 samples\n00:01.249  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_opengl_0001.png'\n00:01.249  render           | Time: 00:00.91 (Saving: 00:00.24)\n\nBlender quit\n",
+      "stderr_tail": "",
+      "log": "/home/zbq/goo-work/driver-matrix-linux-20261125c/logs/debian-13-nvidia-gtx1660__render-eevee__opengl.log",
+      "missing_artifacts": []
+    },
+    {
+      "entry_id": "debian-13-nvidia-gtx1660",
+      "test_set": "render-eevee",
+      "backend": "vulkan",
+      "command": "/home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_vulkan_ -F PNG -f 1",
+      "required": false,
+      "status": "passed",
+      "reason": null,
+      "exit_code": 0,
+      "duration_sec": 1.422,
+      "started_at": "2026-11-24T17:51:56Z",
+      "finished_at": "2026-11-24T17:51:57Z",
+      "stdout_tail": "$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_vulkan_ -F PNG -f 1\nBlender 5.2.1 LTS\n00:00.401  render           | Rendering single frame\n00:00.401  render           | Rendering frame 1\n00:00.402  render           | Start rendering: Scene, ViewLayer\n00:00.402  render           | Engine: EEVEE\n00:00.627  render           | Fra: 1 | Rendering 1 / 64 samples\n00:00.758  render           | Fra: 1 | Rendering 25 / 64 samples\n00:00.915  render           | Fra: 1 | Rendering 50 / 64 samples\n00:01.003  render           | Fra: 1 | Rendering 64 / 64 samples\n00:01.314  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_vulkan_0001.png'\n00:01.314  render           | Time: 00:00.91 (Saving: 00:00.25)\n\nBlender quit\n",
+      "stderr_tail": "",
+      "log": "/home/zbq/goo-work/driver-matrix-linux-20261125c/logs/debian-13-nvidia-gtx1660__render-eevee__vulkan.log",
+      "missing_artifacts": []
+    }
+  ],
+  "summary": {
+    "runs_total": 4,
+    "passed": 4,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "required_runs": 2,
+    "required_failures": 0,
+    "optional_failures": 0,
+    "driver_failures": 0,
+    "verdict": "pass"
+  }
+}

@@ -1,0 +1,19 @@
+command: /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_vulkan_ -F PNG -f 1
+status: passed
+reason: None
+exit_code: 0
+
+$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan -o /home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_vulkan_ -F PNG -f 1
+Blender 5.2.1 LTS
+00:00.401  render           | Rendering single frame
+00:00.401  render           | Rendering frame 1
+00:00.402  render           | Start rendering: Scene, ViewLayer
+00:00.402  render           | Engine: EEVEE
+00:00.627  render           | Fra: 1 | Rendering 1 / 64 samples
+00:00.758  render           | Fra: 1 | Rendering 25 / 64 samples
+00:00.915  render           | Fra: 1 | Rendering 50 / 64 samples
+00:01.003  render           | Fra: 1 | Rendering 64 / 64 samples
+00:01.314  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/render_debian-13-nvidia-gtx1660_vulkan_0001.png'
+00:01.314  render           | Time: 00:00.91 (Saving: 00:00.25)
+
+Blender quit

@@ -433,6 +433,32 @@
       "notes": "Newest LTS; new pipelines should standardise here. Keep the 22.04 rows until migration completes."
     },
     {
+      "id": "debian-13-nvidia-gtx1660",
+      "description": "Debian 13 trixie X11, NVIDIA GTX 1660 (Pascal), local production validation host",
+      "os": {
+        "family": "linux",
+        "release": "13",
+        "arch": "x64"
+      },
+      "gpu": {
+        "vendor": "nvidia",
+        "kind": "discrete",
+        "examples": ["GTX 1660"],
+        "min_driver": {
+          "display": "NVIDIA Linux 550.163.01",
+          "scheme": "nvidia-linux",
+          "version": "550.163.01"
+        }
+      },
+      "display_server": "x11",
+      "backends": ["opengl", "vulkan"],
+      "test_sets": ["smoke-opengl", "smoke-vulkan", "render-eevee"],
+      "runner_labels": ["self-hosted", "linux", "x64", "gpu-nvidia", "gpu-discrete", "session-x11"],
+      "required": true,
+      "tier": "gate",
+      "notes": "Actual local validation host (GTX 1660, driver 550.163.01). Adds a Pascal-era GPU to the gate so older discrete drivers stay covered."
+    },
+    {
       "id": "ubuntu-24.04-amd",
       "description": "Ubuntu 24.04 LTS X11, AMD GPU with Mesa RADV",
       "os": {

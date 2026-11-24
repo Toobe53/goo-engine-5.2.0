@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "tool": "goo_engine_gpu_probe",
+  "generated_at": "2026-11-24T17:53:14Z",
+  "host": {
+    "hostname": "sb",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "python": "3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "app": {
+    "version": [
+      5,
+      2,
+      1
+    ],
+    "version_string": "5.2.1 LTS",
+    "build_hash": "Unknown",
+    "build_platform": "Unknown",
+    "binary_path": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe"
+  },
+  "expected_backend": "opengl",
+  "detected_backend": "opengl",
+  "backend_match": true,
+  "render": {
+    "attempted": true,
+    "ok": true,
+    "engine": "BLENDER_WORKBENCH",
+    "output": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\driver-matrix-win6\\renders\\probe-render-opengl-blender_workbench.png",
+    "error": null
+  },
+  "errors": [],
+  "warnings": [],
+  "gpu": {
+    "vendor": "Intel",
+    "renderer": "Intel(R) Iris(R) Xe Graphics",
+    "version": "4.6.0 - Build 31.0.101.5590",
+    "device_type": "INTEL",
+    "backend_type": "OPENGL",
+    "shader_platform": null,
+    "source": "gpu.platform"
+  },
+  "preferences_gpu_backend": "OPENGL"
+}

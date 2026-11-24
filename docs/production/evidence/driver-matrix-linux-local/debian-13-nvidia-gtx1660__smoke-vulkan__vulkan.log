@@ -1,0 +1,10 @@
+command: /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python /home/zbq/goo-work/goo-engine/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out /home/zbq/goo-work/driver-matrix-linux-20261125c/probe-debian-13-nvidia-gtx1660-vulkan.json
+status: passed
+reason: None
+exit_code: 0
+
+$ /home/zbq/goo-work/goo-install/blender --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python /home/zbq/goo-work/goo-engine/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out /home/zbq/goo-work/driver-matrix-linux-20261125c/probe-debian-13-nvidia-gtx1660-vulkan.json
+Blender 5.2.1 LTS
+00:00.722  render           | Saved: '/home/zbq/goo-work/driver-matrix-linux-20261125c/renders/probe-render-vulkan-blender_workbench.png'
+gpu-probe: expected=vulkan detected=vulkan match=True render=True
+gpu-probe: vendor=NVIDIA Corporation renderer=NVIDIA GeForce GTX 1660 version=NVIDIA 550.163.01

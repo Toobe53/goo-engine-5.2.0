@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "tool": "goo_engine_gpu_probe",
+  "generated_at": "2026-11-24T17:51:54Z",
+  "host": {
+    "hostname": "matia-home",
+    "platform": "Linux-6.12.113+deb13-amd64-x86_64-with-glibc2.41",
+    "machine": "x86_64",
+    "python": "3.13.13 (main, Apr 25 2025, 12:39:20) [GCC 14.2.1 20250110 (Red Hat 14.2.1-11)]"
+  },
+  "app": {
+    "version": [
+      5,
+      2,
+      1
+    ],
+    "version_string": "5.2.1 LTS",
+    "build_hash": "Unknown",
+    "build_platform": "Unknown",
+    "binary_path": "/home/zbq/goo-work/goo-install/blender"
+  },
+  "expected_backend": "vulkan",
+  "detected_backend": "vulkan",
+  "backend_match": true,
+  "render": {
+    "attempted": true,
+    "ok": true,
+    "engine": "BLENDER_WORKBENCH",
+    "output": "/home/zbq/goo-work/driver-matrix-linux-20261125c/renders/probe-render-vulkan-blender_workbench.png",
+    "error": null
+  },
+  "errors": [],
+  "warnings": [],
+  "gpu": {
+    "vendor": "NVIDIA Corporation",
+    "renderer": "NVIDIA GeForce GTX 1660",
+    "version": "NVIDIA 550.163.01",
+    "device_type": "NVIDIA",
+    "backend_type": "VULKAN",
+    "shader_platform": null,
+    "source": "gpu.platform"
+  },
+  "preferences_gpu_backend": "OPENGL"
+}

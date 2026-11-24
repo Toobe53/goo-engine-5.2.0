@@ -99,3 +99,4 @@ blendcache_*
 /ci-logs/
 /goo_test_output/
 /_verify/
+/_install-windows*/

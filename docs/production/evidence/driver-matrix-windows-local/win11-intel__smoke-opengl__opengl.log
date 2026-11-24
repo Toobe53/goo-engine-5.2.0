@@ -1,0 +1,28 @@
+command: C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_install-windows2\blender.exe --background --factory-startup --gpu-backend opengl --python-exit-code 1 --python C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend opengl --json-out C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\driver-matrix-win6/probe-win11-intel-opengl.json
+status: passed
+reason: None
+exit_code: 0
+
+$ C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_install-windows2\blender.exe --background --factory-startup --gpu-backend opengl --python-exit-code 1 --python C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend opengl --json-out C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\driver-matrix-win6/probe-win11-intel-opengl.json
+Blender 5.2.1 LTS
+00:00.141  system.path      | WARNING Could not generate a temp file name for 'C:\Users\zbq\AppData\Local\Temp\blender_a22364'
+00:00.141  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\Users\zbq\AppData\Local\Temp\'
+00:08.656  system.path      | WARNING Could not generate a temp file name for 'C:\Users\zbq\AppData\Local\Temp\blender_a22364'
+00:08.656  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\Users\zbq\AppData\Local\Temp\'
+00:09.937  render           | Saved: 'C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\driver-matrix-win6\renders\probe-render-opengl-blender_workbench.png'
+Extensions: writing cache failed ([Errno 13] Permission denied: 'C:\\Users\\zbq\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\.cache\\compat.dat').
+gpu-probe: expected=opengl detected=opengl match=True render=True
+gpu-probe: vendor=Intel renderer=Intel(R) Iris(R) Xe Graphics version=4.6.0 - Build 31.0.101.5590
+
+Vendor: Intel
+Renderer: Intel(R) Iris(R) Xe Graphics
+Version: 4.6.0 - Build 31.0.101.5590
+Context Version: 4.6
+Vendor: Intel
+Renderer: Intel(R) Iris(R) Xe Graphics
+Version: 4.6.0 - Build 31.0.101.5590
+Context Version: 4.6
+Vendor: Intel
+Renderer: Intel(R) Iris(R) Xe Graphics
+Version: 4.6.0 - Build 31.0.101.5590
+Context Version: 4.6

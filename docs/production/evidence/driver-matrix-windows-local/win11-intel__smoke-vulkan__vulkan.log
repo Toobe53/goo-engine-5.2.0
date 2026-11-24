@@ -1,0 +1,15 @@
+command: C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_install-windows2\blender.exe --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\driver-matrix-win6/probe-win11-intel-vulkan.json
+status: passed
+reason: None
+exit_code: 0
+
+$ C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_install-windows2\blender.exe --background --factory-startup --gpu-backend vulkan --python-exit-code 1 --python C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0/tools/driver_matrix/smoke/gpu_probe.py -- --expect-backend vulkan --json-out C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\driver-matrix-win6/probe-win11-intel-vulkan.json
+Blender 5.2.1 LTS
+00:00.078  system.path      | WARNING Could not generate a temp file name for 'C:\Users\zbq\AppData\Local\Temp\blender_a21004'
+00:00.078  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\Users\zbq\AppData\Local\Temp\'
+00:00.609  system.path      | WARNING Could not generate a temp file name for 'C:\Users\zbq\AppData\Local\Temp\blender_a21004'
+00:00.609  system.path      | WARNING Could not generate a temp session subdirectory, falling back to 'C:\Users\zbq\AppData\Local\Temp\'
+00:00.953  render           | Saved: 'C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\driver-matrix-win6\renders\probe-render-vulkan-blender_workbench.png'
+Extensions: writing cache failed ([Errno 13] Permission denied: 'C:\\Users\\zbq\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\.cache\\compat.dat').
+gpu-probe: expected=vulkan detected=vulkan match=True render=True
+gpu-probe: vendor=Intel Corporation renderer=Intel(R) Iris(R) Xe Graphics version=Intel Corporation 101.5590

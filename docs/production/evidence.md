@@ -1,6 +1,11 @@
-# 生产验证证据（2026-11-24）
+# 生产验证证据：CI 历史（2026-11-24）
 
-本文件记录 `production/5.2` 在提交 `9d4dce4e` 上实际取得的构建与运行时证据。它只记录已执行的内容；没有执行的项目在最后一节明确列出。
+本文件记录 `production/5.2` 在提交 `9d4dce4e` 上通过 GitHub CI 和 Windows CI 产物取得的
+历史证据。macOS 已按用户要求移出当前交付范围；Windows/Linux 的本地构建、干净安装、
+CTest 和真实驱动矩阵见
+[evidence-windows-local.md](evidence-windows-local.md) 与
+[evidence-linux-local.md](evidence-linux-local.md)。本文件只记录已执行的内容；没有执行的
+项目在最后一节明确列出。
 
 ## 构建产物
 
@@ -58,12 +63,14 @@ macOS 没有构建失败记录；失败原因是托管 runner 拿不到机器：
 
 macOS 的源码编译成功证据来自 `45344327291` 的 `Build release (macOS)` 步骤；该 run 后续仅因 artifact 上传路径错误失败。当前没有 macOS artifact，也没有在 macOS 上实际启动/渲染。
 
-## 仍未验证
+## 仍未验证（当前状态）
 
-- 一次三平台全绿、带 macOS artifact 的 CI run。
-- CMake/CTest 下的真实 `ctest -L goo` 执行；上述测试是直接调用 wrapper。
-- 真实 GPU/驱动矩阵；18 个环境目前只有 descriptor 校验。
-- 真实崩溃 dump 采集；crashmon 只有单元测试与 Windows 启动自测。
-- Windows 代码签名、macOS notarization、安装包/更新/回滚。
+- 完整 19 行驱动矩阵：目前只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行有真实
+  硬件结果；其余仍是 descriptor。
+- 真实崩溃 dump 采集；crashmon 目前只有单元测试与 Windows 启动自测。
+- Windows 代码签名、安装包/更新/回滚。
+- macOS 已不在交付范围；本文中的 macOS runner 记录仅作历史，不再作为验收项。
 
-在这些证据补齐前，不应把该分支标记为“稳定生产版”。
+Windows 本地 `ctest -L goo` 已真实执行（7 pass、1 skip），不再列为未验证；详见
+[evidence-windows-local.md](evidence-windows-local.md)。在这些剩余项补齐前，不应把该分支
+标记为“完整稳定生产版”。
