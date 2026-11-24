@@ -3,7 +3,7 @@
 本文档描述 Goo Engine 5.2 生产分支的崩溃监督原型 `tools/crashmon/`：它做什么、怎么用、采集什么、不采集什么，以及距离生产级崩溃遥测还差哪些东西。
 
 > 状态（2026-11）：这是一个**原型**。Windows 路径已在一台 Windows 11 + Blender 5.2.3 LTS 的机器上完成端到端自测（真实子进程、日志、manifest、report、dry-run 上传计划），并已对一份**真实 Blender minidump** 完成发现、复制、SHA-256 与 report 校验（见
-> [`evidence/crashmon-windows-real/`](evidence/crashmon-windows-real/)）。但还没有用 `crashmon run` 监督一次真实原生崩溃，退出码来自 WER 事件而非 supervisor；也没有符号化。Linux 与 macOS 的采集代码已实现，但本交付中只通过注入/模拟的能力探测测试过，**没有在真实 Linux/macOS 主机上运行**。不要把“代码路径存在”当成“该平台已验证”。
+> [`evidence/crashmon-windows-real/`](evidence/crashmon-windows-real/)）。另用 `crashmon run` 监督了一次**受控原生崩溃**（测试用 CPython 扩展空指针写，不是产品故障），supervisor 直接观察到退出码 `0xC0000005` 并生成 `CRASH` bundle；该次未配置 WER LocalDumps，所以 crash artifacts 为 0（见 [`evidence/crashmon-supervisor-test/`](evidence/crashmon-supervisor-test/)）。尚未用产品真实故障做 supervised 崩溃，也没有符号化。Linux 与 macOS 的采集代码已实现，但本交付中只通过注入/模拟的能力探测测试过，**没有在真实 Linux/macOS 主机上运行**。不要把“代码路径存在”当成“该平台已验证”。
 
 ## 1. 目标与非目标
 
@@ -326,13 +326,33 @@ WER Application Error 记录：`blender.exe` 5.2.1.0、`tbbmalloc.dll`、`0xC000
 [`evidence/crashmon-windows-real/`](evidence/crashmon-windows-real/)。129.4 MiB 的 dump
 本身未提交，只保留在忽略的 `_work/` 中。
 
+### supervisor 受控原生崩溃（2026-11-24，Windows）
+
+为验证 `crashmon run` 自己不依赖 WER 事件也能识别崩溃，使用 `_install-windows2\blender.exe`
+和一个**测试专用** CPython 扩展 `crash_ext.pyd`：其 `PyInit_crash_ext` 执行空指针写，
+从 Blender 自带 Python `import crash_ext` 触发原生 `EXCEPTION_ACCESS_VIOLATION`。
+
+```powershell
+python tools\crashmon\crashmon_cli.py run `
+  --blender _install-windows2\blender.exe `
+  --output-dir _work\crashmon-supervisor --skip-gpu --skip-probe --timeout 120 --report `
+  -- --background --factory-startup --python _work\crashnative\crash_blender_ext.py
+```
+
+结果：bundle `crashmon-run-20261124T192808Z-ec630c`，`Verdict: CRASH`，
+退出 `0xC0000005`（raw `3221225477`），2 条日志，崩溃产物 0 个，manifest
+schema 0 问题。该次没有配置 WER LocalDumps，所以没有生成 `.dmp`；Blender 自己写
+`%TEMP%\blender.crash.txt` 也因权限失败，但把原生栈写到了 stderr。它证明 supervisor
+的退出码分类、日志捕获和 bundle 收尾可用，**不代表**产品真实故障路径或 dump 符号化已验证。
+证据：[`evidence/crashmon-supervisor-test/`](evidence/crashmon-supervisor-test/)。
+
 ### 明确未验证
 
 | 项 | 原因 / 影响 |
 | --- | --- |
 | 真实 Linux 主机上的 coredumpctl/core_pattern/ulimit 采集 | 只在 Windows 上以注入的 `which_func`/`runner`/reader 测试；未验证发行版差异、权限、systemd-coredump |
 | 真实 macOS DiagnosticReports 解析 | 未在 macOS 上运行；`.ips` 首行 JSON 与 `.crash` 的格式随版本变化，匹配可能漏报 |
-| `crashmon run` 监督真实原生崩溃 | 已采集真实 dump，但退出码来自 WER 事件；没有让 supervisor 直接观察崩溃 |
+| `crashmon run` 监督真实原生崩溃 | 已用受控测试扩展触发 `0xC0000005`，supervisor 直接观察到并生成 `CRASH` bundle；但未配置 WER LocalDumps，artifacts=0，且不是产品真实故障路径 |
 | dump 符号化/调用栈重建 | 没有 PDB/build ID 匹配；只能保留原始 minidump |
 | `coredumpctl dump` 实际提取 | 未在 Linux 实机执行；polkit/权限行为未知 |
 | Windows `Report.wer` 真实报告解析 | 已发现真实 WER 报告并记录大小，但本次未复制/解析其内容 |

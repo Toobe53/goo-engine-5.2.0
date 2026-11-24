@@ -1,0 +1,8 @@
+sign_windows.ps1
+  artifacts: C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\dist\goo-engine-5.2.1
+  files: 1
+  mode: DRY-RUN (default)
+  [dry-run] & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign /fd SHA256 /f <certificate-not-set> /p <redacted> /tr http://timestamp.digicert.com /td SHA256 C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\dist\goo-engine-5.2.1\goo-engine-5.2.1-windows-x64-setup.exe
+  [dry-run] & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" verify /pa /q "C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\dist\goo-engine-5.2.1\goo-engine-5.2.1-windows-x64-setup.exe"
+dry-run: no signing performed. Re-run with -Execute to sign for real.
+remember: sign before build_release.py so SHA256SUMS covers signed bytes.

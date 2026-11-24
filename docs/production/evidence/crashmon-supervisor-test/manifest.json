@@ -1,0 +1,506 @@
+{
+  "schema_version": "crashmon.bundle/1",
+  "tool": {
+    "name": "crashmon",
+    "version": "0.1.0",
+    "prototype": true,
+    "python": "3.12.14",
+    "executable": "<HOME>\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe"
+  },
+  "bundle": {
+    "id": "crashmon-run-20261124T192808Z-ec630c",
+    "kind": "run",
+    "created_utc": "2026-11-24T19:28:09Z",
+    "created_local": "2026-11-25T03:28:09+08:00",
+    "timezone": "中国标准时间",
+    "manifest_path": "manifest.json"
+  },
+  "privacy": {
+    "level": "basic",
+    "raw_logs_included": true,
+    "environment_scope": "allowlist",
+    "network": "disabled",
+    "redaction": {
+      "level": "basic",
+      "applied": true,
+      "replacements": 22,
+      "placeholders": [
+        "<HOME>"
+      ]
+    },
+    "notes": [
+      "Text logs and text crash reports are redacted at capture time.",
+      "Binary dumps/cores are copied verbatim; redaction cannot reach inside process memory.",
+      "The full environment is never captured; only allowlisted keys are stored.",
+      "Nothing is uploaded by this prototype."
+    ]
+  },
+  "run": {
+    "started_utc": "2026-11-24T19:28:08Z",
+    "ended_utc": "2026-11-24T19:28:09Z",
+    "duration_s": 1.015,
+    "timeout_seconds": 120.0,
+    "timed_out": false,
+    "command": [
+      "<HOME>\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe",
+      "--background",
+      "--factory-startup",
+      "--python",
+      "<HOME>\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\crashnative\\crash_blender_ext.py"
+    ],
+    "cwd": "<HOME>\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0",
+    "exit": {
+      "raw": 3221225477,
+      "code_hex": "0xC0000005",
+      "signal": null,
+      "signal_name": null,
+      "windows_exception": {
+        "code_hex": "0xC0000005",
+        "name": "ACCESS_VIOLATION"
+      },
+      "category": "crash",
+      "description": "Windows status 0xC0000005 (ACCESS_VIOLATION)",
+      "timed_out": false
+    },
+    "logs": [
+      {
+        "stream": "stdout",
+        "relative_path": "logs/stdout.log",
+        "size_bytes": 347,
+        "sha256": "1f22147c4fb0041b524f9c6254346cd11b1ffabaa08278489980a1869ff6a316",
+        "retained": true,
+        "tail_only": false,
+        "tail": [
+          "Blender 5.2.1 LTS",
+          "00:00.062  system.path      | WARNING Could not generate a temp file name for '<HOME>\\AppData\\Local\\Temp\\blender_a14420'",
+          "00:00.062  system.path      | WARNING Could not generate a temp session subdirectory, falling back to '<HOME>\\AppData\\Local\\Temp\\'",
+          "importing crash_ext",
+          "Writing: <HOME>\\AppData\\Local\\Temp\\blender.crash.txt"
+        ],
+        "files": [
+          {
+            "relative_path": "logs/stdout.log",
+            "size_bytes": 347,
+            "sha256": "1f22147c4fb0041b524f9c6254346cd11b1ffabaa08278489980a1869ff6a316"
+          }
+        ],
+        "rotation": {
+          "max_bytes": 67108864,
+          "backups": 3,
+          "rotated": false,
+          "rotated_file_count": 0
+        },
+        "redactions": 3,
+        "errors": []
+      },
+      {
+        "stream": "stderr",
+        "relative_path": "logs/stderr.log",
+        "size_bytes": 21448,
+        "sha256": "4e292e61d250b4f648be47859dacdfb0a23499511445501c01247488f3257ff2",
+        "retained": true,
+        "tail_only": false,
+        "tail": [
+          "0x00007FFDC4FB0000 10.0.26100.1150      VERSION.dll  ",
+          "0x00007FFD99AE0000 14.44.35211.0        VCRUNTIME140_1.dll  ",
+          "0x00007FFDD18E0000 10.0.26100.9974      SHELL32.dll  ",
+          "0x00007FFDD05E0000 10.0.26100.9974      ole32.dll  ",
+          "0x00007FFDD0780000 10.0.26100.9818      combase.dll  ",
+          "0x00007FFDD1180000 10.0.26100.9818      SHLWAPI.dll  ",
+          "0x00007FFDCC6F0000 10.0.26100.9818      dbghelp.dll  ",
+          "0x00007FFDD0B70000 10.0.26100.9974      OLEAUT32.dll  ",
+          "0x00007FFD29B70000                      shaderc_shared.dll  ",
+          "0x00007FFD4C1A0000 1.4.341.0            vulkan-1.dll  ",
+          "0x00007FFD4BF70000                      epoxy-0.dll  ",
+          "0x00007FFDD11F0000 10.0.26100.9818      shcore.dll  ",
+          "0x00007FFDD0B30000 10.0.26100.9818      IMM32.dll  ",
+          "0x00007FFDCCBE0000 10.0.26100.9818      dxgi.dll  ",
+          "0x00007FFD498D0000 3.1.13.0             OpenImageIO_Util.dll  ",
+          "0x00007FFD13C80000 3.1.13.0             OpenImageIO.dll  ",
+          "0x00007FFD48FD0000                      OpenEXR.dll  ",
+          "0x00007FFD15CE0000                      OpenColorIO_2_5.dll  ",
+          "0x00007FFD508E0000                      Iex.dll  ",
+          "0x00007FFD4ECA0000                      Imath.dll  ",
+          "0x00007FFD18960000 3.13.13150.1013      python313.dll  ",
+          "0x00007FFDCF050000 10.0.26100.9818      CFGMGR32.dll  ",
+          "0x00007FFDCB710000 10.0.26100.9818      dwmapi.dll  ",
+          "0x00007FFDCF320000 10.0.26100.3912      powrprof.dll  ",
+          "0x00007FFDD01E0000 10.0.26100.9818      WS2_32.dll  ",
+          "0x00007FFDB23E0000 10.0.26100.9974      MPR.dll  ",
+          "0x00007FFD42B70000                      openjph.0.25.dll  ",
+          "0x00007FFD42A90000                      OpenEXRCore.dll  ",
+          "0x00007FFD54FA0000 14.44.35211.0        MSVCP140_ATOMIC_WAIT.dll  ",
+          "0x00007FFD132B0000                      aom.dll  ",
+          "0x00007FFD998F0000                      IlmThread.dll  ",
+          "0x00007FFDCF3B0000 10.0.26100.9974      bcrypt.dll  ",
+          "0x00007FFDCF300000 10.0.26100.9818      UMPDC.dll  ",
+          "0x00007FFDCE170000 10.0.26100.9818      kernel.appcore.dll  ",
+          "0x00007FFDCCF20000 10.0.26100.9974      windows.storage.dll  ",
+          "0x00007FFDCF3E0000 10.0.26100.9818      profapi.dll  ",
+          "0x00007FFDCEA40000 10.0.26100.9711      CRYPTBASE.DLL  ",
+          "0x00007FFDCF9A0000 10.0.26100.9974      bcryptPrimitives.dll  ",
+          "0x00007FFDA2C40000 10.0.26100.9818      p9np.dll  ",
+          "0x00007FFDB37B0000 10.0.26100.1         drprov.dll  ",
+          "0x00007FFD9F1E0000 10.0.26100.9818      ntlanman.dll  ",
+          "0x00007FFD9F020000 10.0.26100.1         davclnt.dll  ",
+          "0x00007FFDCEFE0000 10.0.26100.9818      WINSTA.dll  ",
+          "0x00007FFDC3F20000 10.0.26100.7019      wkscli.dll  ",
+          "0x00007FFDA5850000 10.0.26100.1         cscapi.dll  ",
+          "0x00007FFDCDAE0000 10.0.26100.1882      netutils.dll  ",
+          "0x00007FFDCB610000 10.0.26100.9818      uxtheme.dll  ",
+          "0x00000197B7B70000 3.13.13150.1013      python3.DLL  ",
+          "0x00007FFD50570000 3.13.13150.1013      _ctypes.pyd  ",
+          "0x00007FFD95B70000                      libffi-8.dll  ",
+          "0x00007FFD508C0000 3.13.13150.1013      _bz2.pyd  ",
+          "0x00007FFD4D1D0000 3.13.13150.1013      _lzma.pyd  ",
+          "0x00007FFD429E0000 3.13.13150.1013      unicodedata.pyd  ",
+          "0x00007FFD4F5D0000 3.13.13150.1013      _hashlib.pyd  ",
+          "0x00007FFD12C70000 3.5.6.0              libcrypto-3.dll  ",
+          "0x00007FFDCFB10000 10.0.26100.9818      CRYPT32.dll  ",
+          "0x00007FFD4EC80000 3.13.13150.1013      _socket.pyd  ",
+          "0x00007FFDCDB40000 10.0.26100.9818      IPHLPAPI.DLL  ",
+          "0x00007FFD95050000 3.13.13150.1013      select.pyd  ",
+          "0x00007FFD934A0000 3.13.13150.1013      _multiprocessing.pyd  ",
+          "0x00007FFD93450000 3.13.13150.1013      _wmi.pyd  ",
+          "0x00007FFDC9A70000 7.0.26100.9974       PROPSYS.dll  ",
+          "0x00007FFD4D110000 3.13.13150.1013      _ssl.pyd  ",
+          "0x00007FFD299E0000 3.5.6.0              libssl-3.dll  ",
+          "0x00007FFDCE730000 10.0.26100.9818      mswsock.dll  ",
+          "0x00007FFD425D0000                      backend_c.cp313-win_amd64.pyd  ",
+          "0x00007FFD92E00000 3.13.13150.1013      _queue.pyd  ",
+          "0x00007FFDCEA20000 10.0.26100.9818      CRYPTSP.dll  ",
+          "0x00007FFDCE0D0000 10.0.26100.7705      rsaenh.dll  ",
+          "0x00007FFD90B10000 3.13.13150.1013      _uuid.pyd  ",
+          "0x00007FFD4CBE0000                      crash_ext.pyd  ",
+          "",
+          "# Python backtrace",
+          "  File \"<frozen importlib._bootstrap>\", line 488 in _call_with_frames_removed",
+          "  File \"<frozen importlib._bootstrap_external>\", line 1317 in create_module",
+          "  File \"<frozen importlib._bootstrap>\", line 813 in module_from_spec",
+          "  File \"<frozen importlib._bootstrap>\", line 921 in _load_unlocked",
+          "  File \"<frozen importlib._bootstrap>\", line 1331 in _find_and_load_unlocked",
+          "  File \"<frozen importlib._bootstrap>\", line 1360 in _find_and_load",
+          "  File \"<HOME>\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\crashnative\\crash_blender_ext.py\", line 7 in <module>"
+        ],
+        "files": [
+          {
+            "relative_path": "logs/stderr.log",
+            "size_bytes": 21448,
+            "sha256": "4e292e61d250b4f648be47859dacdfb0a23499511445501c01247488f3257ff2"
+          }
+        ],
+        "rotation": {
+          "max_bytes": 67108864,
+          "backups": 3,
+          "rotated": false,
+          "rotated_file_count": 0
+        },
+        "redactions": 8,
+        "errors": []
+      }
+    ],
+    "spawn_error": null
+  },
+  "system": {
+    "os": {
+      "name": "Windows",
+      "release": "11",
+      "version": "10.0.26200",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "windows_release": "11",
+      "windows_version": "10.0.26200",
+      "service_pack": "SP0"
+    },
+    "arch": "AMD64",
+    "node_arch": "AMD64",
+    "cpu": {
+      "logical_cores": 16,
+      "model": "12th Gen Intel(R) Core(TM) i5-12500H"
+    },
+    "memory": {
+      "total_bytes": 16781717504,
+      "source": "GlobalMemoryStatusEx"
+    },
+    "python": {
+      "version": "3.12.14",
+      "version_full": "3.12.14 (main, Sep  1 2026, 14:17:39) [MSC v.1944 64 bit (AMD64)]",
+      "executable": "<HOME>\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe",
+      "implementation": "cpython"
+    },
+    "errors": []
+  },
+  "gpu": {
+    "skipped": true,
+    "reason": "--skip-gpu"
+  },
+  "blender": {
+    "path": "<HOME>\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_install-windows2\\blender.exe",
+    "probe_skipped": true
+  },
+  "environment": {
+    "scope": "allowlist",
+    "considered_keys": [
+      "BLENDER_USER_CONFIG",
+      "BLENDER_USER_SCRIPTS",
+      "BLENDER_USER_EXTENSIONS",
+      "BLENDER_SYSTEM_SCRIPTS",
+      "BLENDER_SYSTEM_PYTHON",
+      "BLENDER_VERBOSE",
+      "CUDA_VISIBLE_DEVICES",
+      "HIP_VISIBLE_DEVICES",
+      "ROCR_VISIBLE_DEVICES",
+      "METAL_DEVICE_WRAPPER_TYPE",
+      "VK_ICD_FILENAMES",
+      "VK_LOADER_DEBUG",
+      "OCIO",
+      "DISPLAY",
+      "WAYLAND_DISPLAY",
+      "XDG_SESSION_TYPE",
+      "LANG",
+      "LC_ALL",
+      "TMPDIR",
+      "TEMP",
+      "TMP",
+      "PYTHONPATH",
+      "PYTHONHOME",
+      "LD_LIBRARY_PATH",
+      "DYLD_LIBRARY_PATH",
+      "PROCESSOR_ARCHITECTURE",
+      "OS"
+    ],
+    "values": {
+      "TEMP": "<HOME>\\AppData\\Local\\Temp",
+      "TMP": "<HOME>\\AppData\\Local\\Temp",
+      "PROCESSOR_ARCHITECTURE": "AMD64",
+      "OS": "Windows_NT"
+    },
+    "present_count": 4,
+    "excluded_key_count": 58,
+    "note": "Only the allowlisted keys above are stored; the full environment is never captured."
+  },
+  "logs": [
+    {
+      "stream": "stdout",
+      "relative_path": "logs/stdout.log",
+      "size_bytes": 347,
+      "sha256": "1f22147c4fb0041b524f9c6254346cd11b1ffabaa08278489980a1869ff6a316",
+      "retained": true,
+      "tail_only": false,
+      "tail": [
+        "Blender 5.2.1 LTS",
+        "00:00.062  system.path      | WARNING Could not generate a temp file name for '<HOME>\\AppData\\Local\\Temp\\blender_a14420'",
+        "00:00.062  system.path      | WARNING Could not generate a temp session subdirectory, falling back to '<HOME>\\AppData\\Local\\Temp\\'",
+        "importing crash_ext",
+        "Writing: <HOME>\\AppData\\Local\\Temp\\blender.crash.txt"
+      ],
+      "files": [
+        {
+          "relative_path": "logs/stdout.log",
+          "size_bytes": 347,
+          "sha256": "1f22147c4fb0041b524f9c6254346cd11b1ffabaa08278489980a1869ff6a316"
+        }
+      ],
+      "rotation": {
+        "max_bytes": 67108864,
+        "backups": 3,
+        "rotated": false,
+        "rotated_file_count": 0
+      },
+      "redactions": 3,
+      "errors": []
+    },
+    {
+      "stream": "stderr",
+      "relative_path": "logs/stderr.log",
+      "size_bytes": 21448,
+      "sha256": "4e292e61d250b4f648be47859dacdfb0a23499511445501c01247488f3257ff2",
+      "retained": true,
+      "tail_only": false,
+      "tail": [
+        "0x00007FFDC4FB0000 10.0.26100.1150      VERSION.dll  ",
+        "0x00007FFD99AE0000 14.44.35211.0        VCRUNTIME140_1.dll  ",
+        "0x00007FFDD18E0000 10.0.26100.9974      SHELL32.dll  ",
+        "0x00007FFDD05E0000 10.0.26100.9974      ole32.dll  ",
+        "0x00007FFDD0780000 10.0.26100.9818      combase.dll  ",
+        "0x00007FFDD1180000 10.0.26100.9818      SHLWAPI.dll  ",
+        "0x00007FFDCC6F0000 10.0.26100.9818      dbghelp.dll  ",
+        "0x00007FFDD0B70000 10.0.26100.9974      OLEAUT32.dll  ",
+        "0x00007FFD29B70000                      shaderc_shared.dll  ",
+        "0x00007FFD4C1A0000 1.4.341.0            vulkan-1.dll  ",
+        "0x00007FFD4BF70000                      epoxy-0.dll  ",
+        "0x00007FFDD11F0000 10.0.26100.9818      shcore.dll  ",
+        "0x00007FFDD0B30000 10.0.26100.9818      IMM32.dll  ",
+        "0x00007FFDCCBE0000 10.0.26100.9818      dxgi.dll  ",
+        "0x00007FFD498D0000 3.1.13.0             OpenImageIO_Util.dll  ",
+        "0x00007FFD13C80000 3.1.13.0             OpenImageIO.dll  ",
+        "0x00007FFD48FD0000                      OpenEXR.dll  ",
+        "0x00007FFD15CE0000                      OpenColorIO_2_5.dll  ",
+        "0x00007FFD508E0000                      Iex.dll  ",
+        "0x00007FFD4ECA0000                      Imath.dll  ",
+        "0x00007FFD18960000 3.13.13150.1013      python313.dll  ",
+        "0x00007FFDCF050000 10.0.26100.9818      CFGMGR32.dll  ",
+        "0x00007FFDCB710000 10.0.26100.9818      dwmapi.dll  ",
+        "0x00007FFDCF320000 10.0.26100.3912      powrprof.dll  ",
+        "0x00007FFDD01E0000 10.0.26100.9818      WS2_32.dll  ",
+        "0x00007FFDB23E0000 10.0.26100.9974      MPR.dll  ",
+        "0x00007FFD42B70000                      openjph.0.25.dll  ",
+        "0x00007FFD42A90000                      OpenEXRCore.dll  ",
+        "0x00007FFD54FA0000 14.44.35211.0        MSVCP140_ATOMIC_WAIT.dll  ",
+        "0x00007FFD132B0000                      aom.dll  ",
+        "0x00007FFD998F0000                      IlmThread.dll  ",
+        "0x00007FFDCF3B0000 10.0.26100.9974      bcrypt.dll  ",
+        "0x00007FFDCF300000 10.0.26100.9818      UMPDC.dll  ",
+        "0x00007FFDCE170000 10.0.26100.9818      kernel.appcore.dll  ",
+        "0x00007FFDCCF20000 10.0.26100.9974      windows.storage.dll  ",
+        "0x00007FFDCF3E0000 10.0.26100.9818      profapi.dll  ",
+        "0x00007FFDCEA40000 10.0.26100.9711      CRYPTBASE.DLL  ",
+        "0x00007FFDCF9A0000 10.0.26100.9974      bcryptPrimitives.dll  ",
+        "0x00007FFDA2C40000 10.0.26100.9818      p9np.dll  ",
+        "0x00007FFDB37B0000 10.0.26100.1         drprov.dll  ",
+        "0x00007FFD9F1E0000 10.0.26100.9818      ntlanman.dll  ",
+        "0x00007FFD9F020000 10.0.26100.1         davclnt.dll  ",
+        "0x00007FFDCEFE0000 10.0.26100.9818      WINSTA.dll  ",
+        "0x00007FFDC3F20000 10.0.26100.7019      wkscli.dll  ",
+        "0x00007FFDA5850000 10.0.26100.1         cscapi.dll  ",
+        "0x00007FFDCDAE0000 10.0.26100.1882      netutils.dll  ",
+        "0x00007FFDCB610000 10.0.26100.9818      uxtheme.dll  ",
+        "0x00000197B7B70000 3.13.13150.1013      python3.DLL  ",
+        "0x00007FFD50570000 3.13.13150.1013      _ctypes.pyd  ",
+        "0x00007FFD95B70000                      libffi-8.dll  ",
+        "0x00007FFD508C0000 3.13.13150.1013      _bz2.pyd  ",
+        "0x00007FFD4D1D0000 3.13.13150.1013      _lzma.pyd  ",
+        "0x00007FFD429E0000 3.13.13150.1013      unicodedata.pyd  ",
+        "0x00007FFD4F5D0000 3.13.13150.1013      _hashlib.pyd  ",
+        "0x00007FFD12C70000 3.5.6.0              libcrypto-3.dll  ",
+        "0x00007FFDCFB10000 10.0.26100.9818      CRYPT32.dll  ",
+        "0x00007FFD4EC80000 3.13.13150.1013      _socket.pyd  ",
+        "0x00007FFDCDB40000 10.0.26100.9818      IPHLPAPI.DLL  ",
+        "0x00007FFD95050000 3.13.13150.1013      select.pyd  ",
+        "0x00007FFD934A0000 3.13.13150.1013      _multiprocessing.pyd  ",
+        "0x00007FFD93450000 3.13.13150.1013      _wmi.pyd  ",
+        "0x00007FFDC9A70000 7.0.26100.9974       PROPSYS.dll  ",
+        "0x00007FFD4D110000 3.13.13150.1013      _ssl.pyd  ",
+        "0x00007FFD299E0000 3.5.6.0              libssl-3.dll  ",
+        "0x00007FFDCE730000 10.0.26100.9818      mswsock.dll  ",
+        "0x00007FFD425D0000                      backend_c.cp313-win_amd64.pyd  ",
+        "0x00007FFD92E00000 3.13.13150.1013      _queue.pyd  ",
+        "0x00007FFDCEA20000 10.0.26100.9818      CRYPTSP.dll  ",
+        "0x00007FFDCE0D0000 10.0.26100.7705      rsaenh.dll  ",
+        "0x00007FFD90B10000 3.13.13150.1013      _uuid.pyd  ",
+        "0x00007FFD4CBE0000                      crash_ext.pyd  ",
+        "",
+        "# Python backtrace",
+        "  File \"<frozen importlib._bootstrap>\", line 488 in _call_with_frames_removed",
+        "  File \"<frozen importlib._bootstrap_external>\", line 1317 in create_module",
+        "  File \"<frozen importlib._bootstrap>\", line 813 in module_from_spec",
+        "  File \"<frozen importlib._bootstrap>\", line 921 in _load_unlocked",
+        "  File \"<frozen importlib._bootstrap>\", line 1331 in _find_and_load_unlocked",
+        "  File \"<frozen importlib._bootstrap>\", line 1360 in _find_and_load",
+        "  File \"<HOME>\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\crashnative\\crash_blender_ext.py\", line 7 in <module>"
+      ],
+      "files": [
+        {
+          "relative_path": "logs/stderr.log",
+          "size_bytes": 21448,
+          "sha256": "4e292e61d250b4f648be47859dacdfb0a23499511445501c01247488f3257ff2"
+        }
+      ],
+      "rotation": {
+        "max_bytes": 67108864,
+        "backups": 3,
+        "rotated": false,
+        "rotated_file_count": 0
+      },
+      "redactions": 8,
+      "errors": []
+    }
+  ],
+  "crash_artifacts": [],
+  "platform": {
+    "system": "Windows",
+    "windows": {
+      "supported": true,
+      "crashdumps": {
+        "path": "<HOME>\\AppData\\Local\\CrashDumps",
+        "exists": true,
+        "readable": true,
+        "recent_matching_files": 0
+      },
+      "localdumps_registry": {
+        "supported": true,
+        "entries": [
+          {
+            "root": "HKLM",
+            "key": "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps",
+            "values": {}
+          }
+        ],
+        "enabled_hint": false,
+        "notes": [
+          "LocalDumps values are reported read-only; crashmon never creates or modifies them."
+        ],
+        "errors": []
+      },
+      "wer_dirs": [
+        {
+          "label": "local-ReportArchive",
+          "path": "<HOME>\\AppData\\Local\\Microsoft\\Windows\\WER\\ReportArchive",
+          "exists": false,
+          "readable": false
+        },
+        {
+          "label": "local-ReportQueue",
+          "path": "<HOME>\\AppData\\Local\\Microsoft\\Windows\\WER\\ReportQueue",
+          "exists": false,
+          "readable": false
+        },
+        {
+          "label": "system-ReportArchive",
+          "path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportArchive",
+          "exists": true,
+          "readable": true
+        },
+        {
+          "label": "system-ReportQueue",
+          "path": "C:\\ProgramData\\Microsoft\\Windows\\WER\\ReportQueue",
+          "exists": true,
+          "readable": true
+        }
+      ],
+      "werfault": {
+        "path": "C:\\WINDOWS\\System32\\WerFault.exe",
+        "exists": true
+      },
+      "available": true,
+      "notes": [
+        "Windows local dumps require WER LocalDumps configuration or a WER report; a missing dump is not evidence that no crash occurred.",
+        "Crashmon reads WER configuration and directories but never changes them."
+      ],
+      "errors": []
+    }
+  },
+  "upload": {
+    "requested": false,
+    "consent": false,
+    "mode": "disabled",
+    "status": "not-requested",
+    "network_performed": false,
+    "target": null,
+    "file_count": 0,
+    "total_bytes": 0,
+    "plan_file": null,
+    "boundary": "Uploads are disabled by default. This prototype never opens a network socket; even with --upload-url and --consent it writes only a dry-run upload-plan.json."
+  },
+  "limitations": [
+    "The supervisor observes the direct Blender child process only. Crashes in detached child processes, GPU hang/TDR events, or machine-wide failures may not appear in the bundle.",
+    "A missing crash artifact is not proof that no crash occurred. OS dump policy, permissions, and reporting latency can suppress or delay artifacts.",
+    "Minidumps and cores are not symbolized. Reconstructing stacks needs matching debug symbols (PDB/DWARF) and the exact build ID/commit of the Blender binary.",
+    "Windows WER/LocalDumps does not write local dumps by default; Linux cores depend on core_pattern, ulimit, systemd-coredump/apport, and container permissions; macOS crash reports are written asynchronously.",
+    "Binary dumps/cores are copied verbatim and may contain process memory, paths, and user data. Redaction only covers text logs and text crash reports.",
+    "This prototype never performs network I/O and has no upload backend. A production system needs Crashpad/Sentry/Breakpad, a symbol server, retention controls, and an authenticated intake service.",
+    "Exit codes are interpreted with best-effort platform mappings; shell wrappers may translate signals into 128+N exit codes that cannot be distinguished from ordinary exit statuses."
+  ],
+  "notes": [
+    "Supervisor observes only the direct Blender child process."
+  ]
+}

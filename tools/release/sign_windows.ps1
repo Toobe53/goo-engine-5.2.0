@@ -66,7 +66,7 @@ function Resolve-SignTool {
             ForEach-Object { Join-Path $_.FullName 'x64\signtool.exe' } |
             Where-Object { Test-Path -LiteralPath $_ -PathType Leaf }
         if ($candidates) {
-            return $candidates[0]
+            return @($candidates)[0]
         }
     }
     return $null

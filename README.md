@@ -81,13 +81,18 @@ and release-engineering scaffolding. It is intentionally honest about evidence:
   EEVEE 64x64 and shadow-ID renders, and `ctest -L goo` 8 tests (7 pass, 1 skip);
   Debian 13 + GTX 1660 local release build (`7450/7450` targets), the same runtime
   checks and Goo tests; a real 4/4 driver-matrix pass on each of those two hosts;
-  a real Windows minidump preserved and hashed by `crashmon`; a real
+  a real Windows minidump preserved and hashed by `crashmon`; a controlled native
+  crash observed by `crashmon run`; a real
   Windows/Linux release bundle whose `SHA256SUMS` and `release-manifest.json`
-  pass `verify_release.py`; and a Windows per-user installer with a real
-  install/uninstall cycle plus archive-based update and rollback.
-- **Not yet verified:** the remaining 13 Windows/Linux driver-matrix rows, Windows
-  code signing, Linux GPG signing, cross-version upgrade/automatic rollback, or
-  crash-dump symbolization. macOS is out of scope by request.
+  pass `verify_release.py`; a Windows per-user installer with a real
+  install/uninstall cycle plus archive-based update and rollback; a 7-stage
+  local gate (7 passed, 0 failed); and signing-tool checks (Linux GPG
+  detach-sign/verify with a temporary key, Windows `sign_windows.ps1` dry-run
+  resolved the full `signtool.exe` path and exited 0).
+- **Not yet verified:** the remaining 13 Windows/Linux driver-matrix rows,
+  formal release signing with project-controlled Windows/Linux keys (the
+  5.2.1 bundle is still unsigned), cross-version upgrade/automatic rollback,
+  or crash-dump symbolization. macOS is out of scope by request.
 - Exact runs, test counts and remaining gaps:
   [Windows evidence](docs/production/evidence-windows-local.md),
   [Linux evidence](docs/production/evidence-linux-local.md),

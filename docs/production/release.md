@@ -2,11 +2,11 @@
 
 本文档描述 Goo Engine 5.2 生产分支的发布打包、校验和签名流程。目标是：**默认安全、可重复、哈希覆盖最终字节**。
 
-> 状态（2026-11）：Windows/Linux 真实构建产物已跑通 `build_release.py --apply` → `SHA256SUMS` → `release-manifest.json` → `verify_release.py`（PASS，仅 unsigned 占位 warning）。Windows zip 与 Linux tar 都做了两次独立重建且 SHA-256 相同；Linux tar 使用 `--sort=name`、固定 `--mtime`、`--owner=0 --group=0 --numeric-owner` 与 `gzip -n`。**仍未持有真实代码签名证书，未对 Linux 包做 GPG 签名；macOS 不在本次 5.2.1 发布范围。** 签名/公证命令必须由持有密钥的发布负责人在真实环境复核。
+> 状态（2026-11）：Windows/Linux 真实构建产物已跑通 `build_release.py --apply` → `SHA256SUMS` → `release-manifest.json` → `verify_release.py`（PASS，仅 unsigned 占位 warning）。Windows zip 与 Linux tar 都做了两次独立重建且 SHA-256 相同；Linux tar 使用 `--sort=name`、固定 `--mtime`、`--owner=0 --group=0 --numeric-owner` 与 `gzip -n`。**仍未持有项目控制的 Windows 代码签名证书或 Linux 发布 GPG 密钥；`sign_linux.sh` 已用临时测试密钥在 Debian 13 上完成 detached-sign + verify 实测，但正式 5.2.1 包仍 unsigned/unsigned-placeholder；macOS 不在本次 5.2.1 发布范围。** 签名/公证命令必须由持有密钥的发布负责人在真实环境复核。
 
 ## 1. 原则
 
-1. **默认 dry-run**：`build_release.py` 不带 `--apply` 不写文件；两个签名脚本不带 `-Execute`/`--execute` 只打印命令。
+1. **默认 dry-run**：`build_release.py` 不带 `--apply` 不写文件；三个签名脚本（Windows、Linux、macOS）不带 `-Execute`/`--execute` 只打印命令。
 2. **先签名，后计算哈希**：`SHA256SUMS` 必须覆盖签名后的最终字节。先跑签名脚本，再跑 `build_release.py --apply`。
 3. **校验和与 manifest 互相约束**：所有产物必须同时出现在 `SHA256SUMS` 和 `release-manifest.json` 中，且哈希一致。
 4. **占位不是签名**：manifest 的 `signing` 字段只是声明/占位，不能证明产物已签。签名真伪用平台工具验证。
@@ -17,7 +17,8 @@
 ```text
 构建产物（各平台）
    │
-   ├─(可选) sign_windows.ps1 -Execute / sign_macos.sh --execute
+   ├─(可选) sign_windows.ps1 -Execute
+   ├─(可选) sign_linux.sh --execute / sign_macos.sh --execute
    │        └─ 签名/公证后的字节
    ▼
 build_release.py --apply
@@ -247,7 +248,36 @@ pwsh -File tools/release/sign_windows.ps1 -ArtifactsDir dist\5.2.0 -Execute
 - dry-run 不要求证书存在，打印命令后退出 `0`；
 - `-Execute` 缺少 signtool/证书/密码退出 `2`；任一文件签名或验签失败退出 `1`。
 
+本机对真实 setup 的 dry-run 记录见 [`evidence/windows-signing-dryrun/README.md`](evidence/windows-signing-dryrun/README.md)；该次检查同时修复了单元素 `$candidates[0]` 被索引成 `"C"` 的缺陷。
+
 注意：`signtool` 需要 Windows SDK；脚本不会自动安装。证书密码用环境变量传递，CI 中应使用 secret，不要写进命令行历史。
+
+## 5.1 Linux GPG 签名 `sign_linux.sh`
+
+Linux 包不做代码签名；发布方对 `SHA256SUMS` 生成 detached ASCII-armored GPG 签名，用户用已发布指纹校验 `SHA256SUMS`，再校验归档。脚本默认 **dry-run**，`--execute` 才签名并立即 `gpg --verify`。
+
+```bash
+# 预览
+tools/release/sign_linux.sh dist/goo-engine-5.2.1
+
+# 真正签名（密钥必须在发布机的 GPG keyring 中）
+GOO_GPG_KEY='0123456789ABCDEF' \
+  tools/release/sign_linux.sh dist/goo-engine-5.2.1 --execute
+
+# 验证（发布后任何人都可执行）
+gpg --verify dist/goo-engine-5.2.1/SHA256SUMS.asc \
+             dist/goo-engine-5.2.1/SHA256SUMS
+sha256sum -c dist/goo-engine-5.2.1/SHA256SUMS
+```
+
+| 名称 | 说明 |
+| --- | --- |
+| `BUNDLE_DIR` | 必填；必须含 `SHA256SUMS` |
+| `--key` / `GOO_GPG_KEY` | `--execute` 必填；GPG key id/email/fingerprint |
+| `--output` | 默认 `<bundle>/SHA256SUMS.asc` |
+| `--execute` | 真正签名；缺省只打印命令 |
+
+工具已在 Debian 13 / GnuPG 2.4.7 上用临时测试密钥实测通过，证据见 [`evidence/linux-gpg-signing-test/README.md`](evidence/linux-gpg-signing-test/README.md)。该测试密钥已删除；**正式 5.2.1 bundle 仍未 GPG 签名**。
 
 ## 6. macOS 签名与公证 `sign_macos.sh`
 
@@ -317,6 +347,24 @@ python tools/release/verify_release.py --release-dir dist/5.2.0 --check-signatur
 
 > `verify_release.py` 不执行签名。`--check-signatures` 只是复核；没有证书的机器无法用它“补签”。
 
+## 7.1 本地门禁 `local_gate.py`
+
+GitHub 托管构建不作为本分支验收；本地发布前用同一个门禁脚本串行跑静态检查、单元测试、workflow 校验、矩阵校验、已生成 bundle 的 `verify_release.py` 和 `git diff --check`：
+
+```powershell
+python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1
+```
+
+需要连跑 Goo CTest（会实际启动 GPU/EEVEE）时：
+
+```powershell
+python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1 --with-ctest --ctest-dir build-windows-lite
+```
+
+- 阶段：`python-compile`、`crashmon-tests`（44）、`update-tests`（5）、`workflow-validation`（68）、`driver-matrix-validation`（19 环境/4 测试集）、`release-verify`、`git-diff-check`；`--with-ctest` 追加 `goo-ctest`。
+- 选择 `--json` 输出 `goo-local-gate-v1` 报告，含每阶段命令、耗时与输出尾部。
+- 门禁不替代签名、驱动矩阵实机和崩溃 dump 验证；这些仍按本文与 `driver-matrix.md` 单独记录。
+
 ## 8. 发布检查清单
 
 1. 版本号、channel、目标 commit 已确认。
@@ -334,10 +382,10 @@ python tools/release/verify_release.py --release-dir dist/5.2.0 --check-signatur
 
 ## 10. 已知未验证项（诚实清单）
 
-- 未持有真实 Windows 代码签名证书，未执行 `sign_windows.ps1 -Execute`；仅验证了 dry-run、缺少 signtool 时退出 `2`、以及 fake 二进制的命令打印。
+- 未持有真实 Windows 代码签名证书，未执行 `sign_windows.ps1 -Execute`；已修复 dry-run 中 `$candidates[0]` 把单元素字符串索引成 `"C"` 的真实缺陷，并用真实 setup 复测得到完整 `signtool.exe` 路径、退出 `0`。本机 `signtool.exe` 位于 Windows SDK 10.0.26100.0。自签名证书测试在交互式根证书导入处阻塞，已终止并清理临时证书，未留下受信任测试根。
 - 未在 macOS 上执行 `sign_macos.sh`；仅在 Windows 的 Git Bash 下做了 `bash -n` 语法检查与 dry-run，`--execute` 因非 macOS 正确退出 `2`。codesign/notarytool/stapler 的真实调用未验证。
 - 已用真实 Windows/Linux 5.2.1 产物生成并校验 bundle；仍未用真实**已签名**产物验证签名路径。
-- 未验证 `--check-signatures` 对真实已签二进制的结果（本机无 signtool、无已签样本）。
+- 未验证 `--check-signatures` 对真实已签二进制的结果（本机有 `signtool.exe`，但无项目证书/已签样本）。
 - Linux tar 与 Windows zip 都已做两次独立重建同 SHA 验证；Linux 第二次重建在远端完成。
 - 未在真实 Windows 已签名二进制上验证签名路径；安装包/更新/回滚已做**未签名、同版本**实测，跨版本升级与失败自动恢复未验证。
 - `driver-matrix.yml.example` 未在 GitHub Actions 实际启用。
