@@ -584,9 +584,9 @@
       "backends": ["metal"],
       "test_sets": ["smoke-metal", "render-eevee"],
       "runner_labels": ["self-hosted", "macos", "arm64", "gpu-apple", "gpu-integrated"],
-      "required": true,
-      "tier": "gate",
-      "notes": "Apple ships the GPU driver with the OS; the minimum driver is effectively the minimum macOS version."
+      "required": false,
+      "tier": "advisory",
+      "notes": "Historical row only: macOS is out of the 5.2.1 delivery and release gate."
     },
     {
       "id": "macos-15-apple-metal",
@@ -610,9 +610,9 @@
       "backends": ["metal"],
       "test_sets": ["smoke-metal", "render-eevee"],
       "runner_labels": ["self-hosted", "macos", "arm64", "gpu-apple", "gpu-integrated"],
-      "required": true,
-      "tier": "gate",
-      "notes": "Newest macOS gate; macOS 14 stays gated until the studio baseline moves."
+      "required": false,
+      "tier": "advisory",
+      "notes": "Historical row only: macOS is out of the 5.2.1 delivery and release gate."
     },
     {
       "id": "macos-14-apple-opengl",

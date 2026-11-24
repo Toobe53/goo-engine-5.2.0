@@ -2,7 +2,11 @@
 
 本文档描述 Goo Engine 5.2 生产分支的驱动/后端兼容矩阵、主机探测与矩阵执行器，以及把完整矩阵落到 CI 所需的硬件条件。
 
-> 状态（2026-11）：仓库内已有可执行的矩阵与执行器骨架，并在一台 Windows 11 + Intel Iris Xe 开发机上完成流程自测。**NVIDIA、AMD、Apple GPU 以及 Ubuntu、macOS 行尚未在本交付中做实机执行**；它们需要下文所述的硬件实验室/自托管 runner。不要把“矩阵里存在这一行”误读为“这一行已经通过验证”。
+> 状态（2026-11-25）：仓库内已有可执行的矩阵与执行器。Windows 11 + Intel Iris Xe
+> 和 Debian 13 + NVIDIA GTX 1660 两行已完成真实 Goo 构建的 smoke + EEVEE 4/4
+> 执行；其余 13 行 Windows/Linux 组合和 4 行 macOS 历史数据**未在本交付中做实机
+> 执行**。它们需要下文所述的硬件实验室/自托管 runner。不要把“矩阵里存在这一行”
+> 误读为“这一行已经通过验证”。
 
 ## 1. 目的与范围
 
@@ -65,11 +69,12 @@
 
 ## 4. 覆盖范围
 
-当前 18 行，分三档：
+矩阵共 19 行：Windows/Linux 交付范围 15 行，macOS 4 行仅保留为历史/不交付数据。
+Windows/Linux 行分三档：
 
 - **gate（必需）**：发布前必须在对应硬件上通过；失败阻断发布。
 - **nightly（可选）**：每周跑，不作为单次发布阻断条件，但连续失败需要 triage。
-- **advisory（可选）**：已知限制或已弃用路径，只做知情记录（如 macOS OpenGL、Intel Mac + AMD Metal）。
+- **advisory（可选）**：已知限制或已弃用路径，只做知情记录。
 
 | OS | GPU | 行数 | 级别 |
 | --- | --- | --- | --- |
@@ -77,18 +82,24 @@
 | Windows 11 23H2+ | NVIDIA / AMD / Intel Arc | 3 | 均 gate |
 | Ubuntu 22.04 | NVIDIA / AMD / Intel | 3 | NVIDIA、AMD gate；Intel nightly |
 | Ubuntu 24.04 | NVIDIA / AMD / Intel + NVIDIA/AMD Wayland | 5 | NVIDIA、AMD（X11）gate；其余 nightly |
-| macOS 14 | Apple Silicon（Metal）/（OpenGL advisory） | 2 | Metal gate；OpenGL advisory |
-| macOS 15 | Apple Silicon（Metal）/ Intel + AMD（Metal） | 2 | Apple Silicon gate；Intel+AMD advisory |
+| Debian 13 | NVIDIA GTX 1660 | 1 | gate |
+| **合计** | | **15** | 当前 2 行有真实硬件结果 |
 
-后端策略：
+macOS 的 4 行仍保留在 `matrix.json` 中，但按用户要求移出 5.2.1 交付与 release gate；
+不再作为构建或签名验收条件。
 
-| 后端 | Windows | Linux | macOS |
-| --- | --- | --- | --- |
-| OpenGL | 最低 4.3，gate | 最低 4.3，gate | 固定 4.1，**已弃用**，仅 advisory |
-| Vulkan | 最低 1.2，gate | 最低 1.2，gate | 不支持；MoltenVK 不作为生产目标 |
-| Metal | 不适用 | 不适用 | Metal 3（macOS 13+），gate |
+后端策略（Windows/Linux）：
 
-> 重要：矩阵只声明“支持范围”，不等于“已在这些机器上验证”。当前仓库的 gate 行大多没有对应 runner。
+| 后端 | Windows | Linux |
+| --- | --- | --- |
+| OpenGL | 最低 4.3，gate | 最低 4.3，gate |
+| Vulkan | 最低 1.2，gate | 最低 1.2，gate |
+
+> 重要：矩阵只声明“支持范围”，不等于“已在这些机器上验证”。当前只有
+> `win11-intel`（Windows 11 / Iris Xe）和 `debian-13-nvidia-gtx1660`
+> （Debian 13 / GTX 1660）两行完成了 smoke + EEVEE 的真实 4/4 执行；其余
+> 13 行标为**未覆盖**，不得在发布说明中写成通过。发布 manifest 的
+> `driver_requirements` 只声明目标要求，不构成覆盖证明。
 
 ### 4.1 最低驱动基线
 
@@ -223,7 +234,7 @@ GitHub 托管的 `ubuntu-latest`、`windows-latest`、`macos-latest` **不提供
 | --- | --- |
 | Windows | 2 台：NVIDIA 独显、AMD 独显；Intel Arc 可复用其中一台的第二块盘/第二系统 |
 | Linux | 2 台：Ubuntu 22.04/24.04 双系统或两台，NVIDIA 与 AMD 各一；Wayland 行可在同一台切换会话 |
-| macOS | 2 台：Apple Silicon（macOS 14/15 各一或可升级），Intel Mac + AMD 可选 |
+| macOS | 不适用：macOS 已移出 5.2.1 交付与 release gate；对应 4 行只保留历史 |
 | 网络 | runner 需能拉取仓库与构建产物；签名密钥**不得**放在 runner 上 |
 
 ## 8. 新增或修改矩阵行
@@ -237,10 +248,16 @@ GitHub 托管的 `ubuntu-latest`、`windows-latest`、`macos-latest` **不提供
 
 ## 9. 已知缺口与未验证项（诚实清单）
 
-- 仅在本机（Windows 11 26200、Intel Iris Xe、驱动 31.0.101.5590）跑通了 `detect.py`、`run_matrix.py` 的 pass/fail/missing-binary/skip 路径；没有真实 Goo 构建，因此应用内 `gpu_probe.py` 的渲染路径未实机验证。
-- NVIDIA、AMD、Apple GPU 行全部未实机验证；macOS 行未在 macOS 上运行。
-- 未在 Ubuntu 上运行 `detect.py`/`run_matrix.py`（无 Linux 主机）。
-- GitHub Actions 示例未在真实仓库启用，未验证 runner 标签与上传步骤；`driver-matrix.yml.example` 的 YAML 仅人工审查。
+- 已在 Windows 11 26200 / Intel Iris Xe（驱动 31.0.101.5590）和
+  Debian 13 / NVIDIA GTX 1660（驱动 550.163.01）上跑通真实 Goo 构建的
+  `gpu_probe.py`：两行的 smoke-opengl、smoke-vulkan、render-eevee
+  opengl/vulkan 均为 4/4 passed，报告在
+  `docs/production/evidence/driver-matrix-{windows,linux}-local/`。
+- 剩余 13 行（Windows 10、NVIDIA/AMD/Intel Arc、Ubuntu 22.04/24.04 及
+  Wayland）没有对应硬件，标为**未覆盖**，未执行。
+- macOS 4 行未运行且已移出交付；不得作为 release gate 通过项。
+- GitHub Actions 示例未在真实仓库启用，未验证 runner 标签与上传步骤；
+  `driver-matrix.yml.example` 的 YAML 仅人工审查。
 - 矩阵按 vendor 匹配、不按 kind 匹配，存在集显/独显串行风险（见 6.2）。
 - 最低驱动基线来自公开驱动分支，需要在实验室季度更新时复核（见 `maintenance.md`）。
 
@@ -251,7 +268,7 @@ GitHub 托管的 `ubuntu-latest`、`windows-latest`、`macos-latest` **不提供
 | 驱动矩阵 owner | TBD | 维护 matrix.json 与本文档 |
 | Windows GPU lab | TBD | NVIDIA/AMD/Intel 机器与 runner |
 | Linux GPU lab | TBD | Ubuntu X11/Wayland |
-| macOS lab | TBD | Apple Silicon 与 Intel Mac |
+| macOS lab | 不适用 | 已移出 5.2.1 交付；仅保留历史矩阵行 |
 | CI/runner 基础设施 | TBD | self-hosted runner、标签、密钥隔离 |
 | 发布门禁裁决 | TBD | gate 失败时决定阻断/例外 |
 
