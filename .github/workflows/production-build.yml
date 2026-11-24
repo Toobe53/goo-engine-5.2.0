@@ -216,14 +216,17 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $line = (git ls-tree HEAD "lib/${{ matrix.libdir }}" | Select-Object -First 1)
-          if ($LASTEXITCODE -ne 0) {
-            throw 'git ls-tree failed while resolving the precompiled-library submodule'
-          }
+          # Capture the full output before selecting a line. Piping a native
+          # command into Select-Object -First 1 can stop the process early and
+          # leave a non-zero $LASTEXITCODE even when git found the gitlink.
+          $lines = @(git ls-tree HEAD -- "lib/${{ matrix.libdir }}")
           $sha = 'nogitlink'
-          if ($line) {
-            $parts = $line -split '\s+'
+          if ($LASTEXITCODE -eq 0 -and $lines.Count -gt 0) {
+            $parts = @($lines[0] -split '\s+')
             if ($parts.Count -ge 3) { $sha = $parts[2] }
+          }
+          else {
+            Write-Warning "Could not resolve lib/${{ matrix.libdir }}; cache key uses nogitlink."
           }
           "sha=$sha" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
