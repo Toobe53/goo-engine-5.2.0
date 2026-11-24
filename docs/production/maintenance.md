@@ -14,6 +14,9 @@
 
 季度批次建议固定为：1 月（上一年 Q4 驱动）、4 月（Q1）、7 月（Q2）、10 月（Q3）。批次只调整“最低基线”，不追逐最新 hotfix；最新驱动由 nightly 行先行观察。
 
+当前可执行范围（2026-11）：Windows 11 + Intel Iris Xe 与 Debian 13 + GTX 1660 两行已实跑；其余 Windows/Linux 行仍是 descriptor，不能把“矩阵里有这一行”当作“已验证”。本地门禁用
+`python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1`（7 阶段；`--with-ctest` 追加 Goo CTest），发布前必须全过。GitHub 托管 runner 不作为本阶段的验收依据；没有对应硬件时，矩阵行只能保持“未覆盖”。
+
 ## 2. 季度驱动更新
 
 ### 2.1 收集
@@ -23,7 +26,6 @@
 - NVIDIA Windows 显示驱动 / Linux 驱动分支；
 - AMD Adrenalin（Windows）与 Mesa（Linux）；
 - Intel Arc/Iris Windows 驱动与 Mesa；
-- Apple macOS 版本（Metal 随 OS）；
 - Vulkan SDK / loader（只影响构建与测试工具，不进入 `min_driver`）。
 
 不要使用第三方驱动包、修改版 INF 或来源不明的镜像作为基线证据。
@@ -64,7 +66,6 @@
 | Goo Engine 下游分支 | 与上游的合并冲突、生产补丁 | 每周 |
 | Mesa | AMD/Intel OpenGL/Vulkan 修复、Ubuntu 版本同步 | 每月 |
 | NVIDIA / AMD / Intel 驱动 | 已知问题清单、回归、长期支持分支 | 每月 |
-| Apple / Xcode | Metal API、公证要求、macOS 弃用 | 每季度/OS 发布时 |
 | Vulkan-Headers / loader | 构建依赖与验证工具 | 每季度 |
 | Ubuntu / Windows | OS 生命周期、WDDM/显示栈变更 | 每季度 |
 
@@ -155,7 +156,8 @@
 
 ## 7. 已知缺口（诚实清单）
 
-- 目前没有真实的硬件实验室与自托管 GPU runner；本文档的 gate 流程是目标状态，不是已运行状态。
+- 当前只有两条真实硬件行（Windows 11 + Iris Xe、Debian 13 + GTX 1660）；其余 13 行 Windows/Linux 行未覆盖，没有自托管 GPU lab，也没有长期 nightlies。本文档的 gate 流程是目标状态，不是全矩阵已运行状态。
+- 本地门禁已实现并 7/7 通过；GitHub 托管 CI 仍有 runner 队列/平台限制，因此不作为本阶段验收项。
 - 没有历史崩溃数据，severity/SLA 数值均为占位，需团队按实际人力确认。
 - 未定义具体的厂商工单账号与升级联系人（TBD）。
 - 未在真实发布上执行过回滚演练；首次演练需在非生产版本上进行并记录。
@@ -172,6 +174,7 @@
 | 安全负责人 | TBD | TBD |
 | Windows lab | TBD | TBD |
 | Linux lab | TBD | TBD |
-| macOS lab | TBD | TBD |
+
+macOS 已按用户要求移出交付范围，不再保留 macOS lab 责任人。
 
 所有 TBD 在对应人员/硬件落实前不得从文档中删除；用真实姓名替换后再进入生产审计。

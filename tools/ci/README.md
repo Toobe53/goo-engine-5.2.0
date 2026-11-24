@@ -8,14 +8,16 @@ probes for the GOO Engine 5.2 LTS branch (`production/5.2`).
 | `../../.github/workflows/production-build.yml` | GitHub Actions workflow: three-platform release build matrix |
 | `validate_workflow.py` | Stdlib-only static checker for the workflow (triggers, matrix, gating, caches, uploads) |
 | `build_probe.py` | Stdlib-only JSON probe of local build prerequisites; never runs a real build |
+| `local_gate.py` | Local release gate: compile, tests, workflow/matrix validation, bundle verification |
 | `README.md` | This document |
 
-> **Honesty note.** The workflow has been validated *statically* (parser
-> cross-check against PyYAML, mutation tests, local script runs), but it has
-> **not been executed on GitHub-hosted runners yet**. Nothing here proves that a
-> Blender build succeeds on those images. The first real run will be the first
-> end-to-end evidence; expect runner-image drift (apt package names, Xcode,
-> MSVC version) to be the most likely cause of an early failure.
+> **Honesty note.** The workflow has run on GitHub-hosted runners: the Linux and
+> Windows `Build release` jobs passed and produced artifacts, but a complete
+> three-platform green run was never obtained because the macOS job was
+> repeatedly canceled while queued. macOS is out of scope for this delivery.
+> Hosted CI is therefore **not** the acceptance gate here; use
+> `tools/ci/local_gate.py` plus the local build/test evidence. Runner-image drift
+> (apt package names, MSVC version) remains the most likely source of CI failure.
 
 ## Local usage
 
@@ -33,6 +35,11 @@ python tools/ci/build_probe.py > probe.json
 # 3. Is the workflow structurally sound?
 python tools/ci/validate_workflow.py            # exit 0 = all checks passed
 python tools/ci/validate_workflow.py --json     # machine-readable report
+
+# 4. Local release gate (7 stages; requires dist/goo-engine-5.2.1)
+python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1
+# add the Goo CTest suite on a machine with build-windows-lite
+python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1 --with-ctest
 ```
 
 `build_probe.py` exits `0` only when every **required** prerequisite passes:
@@ -180,11 +187,11 @@ matrix (see below).
 * **No packaging, signing or notarization.** Artifacts are the raw
   `<out_dir>/bin/**` trees. Installers, `.app` bundles, DMG/zip packaging and
   code signing stay out of this skeleton.
-* **Not yet executed on real runners.** Only static validation was possible
-  in the change that introduced this workflow. The first run should be
-  manually dispatched (`workflow_dispatch`) on `production/5.2`, and its log
-  uploads are the place to look when something differs from the assumptions
-  above.
+* **Hosted runs are not a green three-platform gate.** Linux and Windows
+  `Build release` jobs passed and uploaded artifacts; the macOS job was
+  canceled while queued, so the overall workflow remains non-green. Use
+  `tools/ci/local_gate.py` and the local evidence for acceptance; treat this
+  workflow as a reproducible build harness, not as the release gate.
 * **Windows update path.** `make.bat update` is interactive on a fresh
   checkout, which is why the workflow calls `make_update.py` directly.
   Developers on Windows who run `make.bat update` interactively are fine;
@@ -217,21 +224,25 @@ workflow so a driver image failure does not block source builds.
 4. Keep GPU tests out of `production-build.yml`: hosted runners cannot run
    them, and a self-hosted outage should not mask a source build result.
 
-## Validation performed for this skeleton
+## Validation performed
 
 With Python 3.12 (no third-party packages in the repository):
 
 ```text
 python -m py_compile tools/ci/build_probe.py tools/ci/validate_workflow.py  -> exit 0
 python tools/ci/validate_workflow.py                                      -> 68 checks passed, 0 failed
+python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1          -> 7 passed, 0 failed
 build_probe.py --text (this Windows host, no cmake/ninja/git)             -> exit 1, NOT READY (expected)
 build_probe.py --repo-root <non-checkout>                                 -> exit 2 (expected)
 ```
 
-In addition, during development the workflow was parsed with PyYAML installed
-into a throwaway temporary directory (never into the repo) and the built-in
-parser's output for every step, trigger and matrix entry matched PyYAML
-exactly. Five mutations of the workflow (missing matrix entry, failing build
-allow to pass, removed label gate, log upload changed from `always()`, invalid
-indentation) were all rejected by `validate_workflow.py` with non-zero exit
-codes.
+Hosted run `45384517223` (head `9d4dce4e`) built Linux x64 and Windows x64
+release artifacts successfully; the macOS arm64 job was canceled after waiting
+in the runner queue. That run is the source of the Windows runtime evidence, not
+a three-platform green CI result. In addition, during development the workflow
+was parsed with PyYAML installed into a throwaway temporary directory (never
+into the repo) and the built-in parser's output for every step, trigger and
+matrix entry matched PyYAML exactly. Five mutations of the workflow (missing
+matrix entry, failing build allow to pass, removed label gate, log upload
+changed from `always()`, invalid indentation) were all rejected by
+`validate_workflow.py` with non-zero exit codes.
