@@ -1,6 +1,6 @@
 # 生产化工程索引（Production Hardening）
 
-本目录记录 Goo Engine 5.2 生产分支在 **Windows + Linux** 上的构建、测试、崩溃监控、驱动矩阵、发布与长期维护方案。macOS 已按用户要求移出交付范围。当前已有双平台本地构建、运行时/测试证据、真实崩溃 dump 采集和真实发布 bundle，但**仍不是“已经稳定生产”的声明**：完整 15 行 Windows/Linux 驱动矩阵（当前仅 2 行有真实硬件结果）、Windows 代码签名、Linux GPG 签名、安装包/更新/回滚仍必须由对应硬件和密钥持有人完成。
+本目录记录 Goo Engine 5.2 生产分支在 **Windows + Linux** 上的构建、测试、崩溃监控、驱动矩阵、发布与长期维护方案。macOS 已按用户要求移出交付范围。当前已有双平台本地构建、运行时/测试证据、真实崩溃 dump 采集、真实发布 bundle，以及 Windows 安装包和安装/更新/回滚实测，但**仍不是“已经稳定生产”的声明**：完整 15 行 Windows/Linux 驱动矩阵（当前仅 2 行有真实硬件结果）、Windows 代码签名、Linux GPG 签名、跨版本升级与自动回滚仍必须由对应硬件和密钥持有人完成。
 
 ## 文档
 
@@ -13,6 +13,7 @@
 - [验证证据](evidence.md)：CI 构建、Windows 运行时与测试门禁。
 - [Linux 本地构建证据](evidence-linux-local.md)：Debian 13 + GTX 1660 的真实构建、EEVEE 渲染与 Goo 测试。
 - [Windows 本地构建证据](evidence-windows-local.md)：Windows 11 + Iris Xe 的 lite 构建、干净安装、CTest 与驱动矩阵。
+- [Windows 安装包/更新/回滚证据](evidence-windows-installer.md)：Inno Setup 安装、卸载、zip 树更新与回滚实测。
 
 ## 关键入口
 
@@ -39,9 +40,9 @@ python tools/release/verify_release.py --release-dir <dir>
 
 ## 当前验证边界
 
-- 已做：Linux 本地 release 构建（Debian 13 / GTX 1660，`7450/7450` 目标、安装后可启动、打包后不设 `LD_LIBRARY_PATH` 仍可启动）；Windows 本地 lite 构建（`7050/7050`，干净 `cmake --install` 后可启动）；两平台 13 个 Goo 节点、EEVEE 渲染、shadow-ID、Goo 测试与迁移 fixture 实测；Windows `ctest -L goo` 8 项（7 pass、1 skip）；Windows/Linux 两行真实驱动矩阵各 4/4 通过；真实 Windows minidump 采集、复制、SHA-256、manifest/report 校验；真实 Windows/Linux 发布包、`SHA256SUMS`、`release-manifest.json` 与 `verify_release.py` PASS；Windows zip 与 Linux tar 各两次重建同 SHA；workflow/矩阵静态校验。
+- 已做：Linux 本地 release 构建（Debian 13 / GTX 1660，`7450/7450` 目标、安装后可启动、打包后不设 `LD_LIBRARY_PATH` 仍可启动）；Windows 本地 lite 构建（`7050/7050`，干净 `cmake --install` 后可启动）；两平台 13 个 Goo 节点、EEVEE 渲染、shadow-ID、Goo 测试与迁移 fixture 实测；Windows `ctest -L goo` 8 项（7 pass、1 skip）；Windows/Linux 两行真实驱动矩阵各 4/4 通过；真实 Windows minidump 采集、复制、SHA-256、manifest/report 校验；真实 Windows/Linux 发布包、`SHA256SUMS`、`release-manifest.json` 与 `verify_release.py` PASS；Windows zip 与 Linux tar 各两次重建同 SHA；Windows 安装包静默安装/卸载、注册表/快捷方式、zip 树更新与回滚实测；workflow/矩阵静态校验。
 - macOS：已从当前开发范围移除；不再以 macOS 构建或 notarization 作为验收项。
-- 未做：剩余 13 行 Windows/Linux 驱动矩阵（当前只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行有真实硬件结果）、Windows 代码签名、Linux GPG 签名、安装包/更新/回滚、崩溃 dump 符号化与 `crashmon run` 监督真实崩溃。
-- 在完成这些之前，不应把本分支产物标记为“稳定生产版”。详见 [evidence-windows-local.md](evidence-windows-local.md)、[evidence-linux-local.md](evidence-linux-local.md) 与 [evidence.md](evidence.md)。
+- 未做：剩余 13 行 Windows/Linux 驱动矩阵（当前只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行有真实硬件结果）、Windows 代码签名、Linux GPG 签名、跨版本升级/自动回滚、崩溃 dump 符号化与 `crashmon run` 监督真实崩溃。
+- 在完成这些之前，不应把本分支产物标记为“稳定生产版”。详见 [evidence-windows-local.md](evidence-windows-local.md)、[evidence-linux-local.md](evidence-linux-local.md)、[evidence-windows-installer.md](evidence-windows-installer.md) 与 [evidence.md](evidence.md)。
 
 生产分支：`production/5.2`。构建 workflow：`.github/workflows/production-build.yml`（PR 需 `ci:build` 标签才会进入重型构建）。

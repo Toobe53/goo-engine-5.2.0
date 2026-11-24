@@ -126,20 +126,21 @@ f548f2a2...  goo-5.2.0-linux-x64.tar.gz
 | 产物 | 大小 | SHA-256 |
 | --- | ---: | --- |
 | `goo-engine-5.2.1-windows-x64.zip` | 273,726,768 B | `8fea6e94b39aefd37f82f3f193771cf182f94106be8d109eaf0229621ffb93ec` |
+| `goo-engine-5.2.1-windows-x64-setup.exe` | 193,345,800 B | `36d7eaaa2d9fe70ce1eb499876a91b5c25742a6147b5914af075b9fe27783d98` |
 | `goo-engine-5.2.1-linux-x64.tar.gz` | 335,439,115 B | `bf3790719df9926bcaf5364a17053a1fa31c6ce36975181ddd2c58836f2c5a60` |
 
 命令（Windows 本机，Python 3.12）：
 
 ```powershell
 python tools/release/build_release.py --version 5.2.1 --name "Goo Engine" `
-  --channel production --artifacts _work/release-staging `
-  --out dist/goo-engine-5.2.1 --commit 7f76f1ef --branch production/5.2 `
-  --build-id local-20261125 --builder zbq `
+  --channel production --artifacts _work/release-artifacts-5.2.1 `
+  --out dist/goo-engine-5.2.1 --commit a2639291 --branch production/5.2 `
+  --build-id local-20261125c --builder zbq `
   --platform windows --platform linux --apply
 python tools/release/verify_release.py --release-dir dist/goo-engine-5.2.1
 ```
 
-结果：`verification: PASS`，2 个 artifact 的 size/SHA-256 与 `SHA256SUMS`、
+结果：`verification: PASS`，3 个 artifact 的 size/SHA-256 与 `SHA256SUMS`、
 `release-manifest.json` 一致；唯一 warning 是 `signing.status=unsigned-placeholder`。
 本次 bundle 的校验材料保留在
 [`evidence/release-goo-engine-5.2.1-local/`](evidence/release-goo-engine-5.2.1-local/README.md)。
@@ -159,6 +160,60 @@ Linux tar 使用 `--mtime='2026-11-24 00:00:00 UTC'` 重新打包，避免解压
 
 随后在远端用完全相同的 `tar`/`gzip` 参数第二次重建，SHA-256 仍为
 `bf3790719df9926bcaf5364a17053a1fa31c6ce36975181ddd2c58836f2c5a60`（`REPRO_EXIT=0`）。
+
+### 4.5 Windows 安装包、安装/卸载与更新/回滚
+
+Windows 安装包由 Inno Setup 6.7.3 生成，**未签名**：
+
+```powershell
+python tools/installer/windows/build_installer.py --version 5.2.1
+```
+
+安装包为 per-user 安装，默认目录 `%LOCALAPPDATA%\Programs\Goo Engine 5.2`，
+不请求管理员权限。包装脚本会为超长工作区路径创建临时短 junction，因为
+Inno Setup 的源路径（含 `..\..\..` 前缀）可能超过 260 字符。
+
+| 产物 | 大小 | SHA-256 |
+| --- | ---: | --- |
+| `goo-engine-5.2.1-windows-x64-setup.exe` | 193,345,800 B | `36d7eaaa2d9fe70ce1eb499876a91b5c25742a6147b5914af075b9fe27783d98` |
+
+真实安装/卸载证据（Windows 11 + Iris Xe，2026-11-25）：
+
+- 静默安装退出码 `0`；安装树 5,647 个文件；`blender.exe --version` =
+  `Blender 5.2.1 LTS`；
+- 13 个 Goo 节点、EEVEE 64×64、`check_shadow_id` 渲染均成功；
+- 注册表 `HKCU\...\Uninstall\{6E2F5E3B-7A4C-4D9B-9A1F-2B6C8D0E4F71}_is1`
+  存在，Start Menu 快捷方式存在；
+- `unins000.exe /VERYSILENT` 退出码 `0`；安装目录、卸载键、快捷方式均被删除。
+
+最终 wrapper 产物（193,345,800 B / `36d7eaaa...`）在**短 `%TEMP%` 路径**下完成
+同一套安装/卸载验证；直接从不含空格但较长的 workspace 路径启动时，在本机初始化
+阶段挂起，复制到短路径后安装成功。发布/下载后应从普通短路径运行，不要把安装包
+留在深层工作目录中执行。
+
+更新/回滚使用 `tools/release/update.py`，以**可移植 zip** 替换安装树：
+
+```powershell
+python tools/release/update.py apply --install-dir C:\goo-install-test `
+  --package .\goo-engine-5.2.1-windows-x64.zip `
+  --expected-sha256 8fea6e94b39aefd37f82f3f193771cf182f94106be8d109eaf0229621ffb93ec
+python tools/release/update.py rollback --install-dir C:\goo-install-test
+```
+
+`apply` 先校验 SHA-256，再解压到同级 staging、备份当前树、替换并写入状态
+文件；`rollback` 恢复最近备份。安装目录的父目录必须可写，用于 staging 和
+备份；状态文件默认也放在父目录，若父目录不可写则回退到
+`%LOCALAPPDATA%\goo-engine\updates\<目录名>-<路径哈希>.update-state.json`。
+已在**安装器安装的树**上实测：更新后 `blender.exe --version` 仍为 5.2.1，
+注册表/快捷方式仍在；回滚后文件数与版本恢复，注册表/快捷方式仍指向同一目录。
+该验证是**同版本重放**，不是跨版本升级测试；回滚会保留一个 `.failed-*`
+目录供诊断。
+
+安装器 `.exe` 也可以直接交给 `update.py apply`：先备份当前树，再把安装包
+复制到短 `%TEMP%` 路径后静默安装，避免深层 workspace 路径导致的初始化
+挂起。它的 `rollback` 只恢复文件树，不会撤销安装器创建的注册表项/快捷方式；
+生产更新应优先使用 zip 树替换。已在 `C:\` 这类父目录不可写的安装位置验证
+状态文件回退与回滚（`RESULT=APPLIED` / `RESULT=ROLLED_BACK`）。
 
 ## 5. Windows 签名 `sign_windows.ps1`
 
@@ -284,7 +339,7 @@ python tools/release/verify_release.py --release-dir dist/5.2.0 --check-signatur
 - 已用真实 Windows/Linux 5.2.1 产物生成并校验 bundle；仍未用真实**已签名**产物验证签名路径。
 - 未验证 `--check-signatures` 对真实已签二进制的结果（本机无 signtool、无已签样本）。
 - Linux tar 与 Windows zip 都已做两次独立重建同 SHA 验证；Linux 第二次重建在远端完成。
-- 未在真实 Windows 已签名二进制上验证签名路径；未做安装包/更新/回滚实测。
+- 未在真实 Windows 已签名二进制上验证签名路径；安装包/更新/回滚已做**未签名、同版本**实测，跨版本升级与失败自动恢复未验证。
 - `driver-matrix.yml.example` 未在 GitHub Actions 实际启用。
 
 ## 11. 责任人（占位）

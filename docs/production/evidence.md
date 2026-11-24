@@ -65,10 +65,11 @@ macOS 的源码编译成功证据来自 `45344327291` 的 `Build release (macOS)
 
 ## 仍未验证（当前状态）
 
-- 完整 19 行驱动矩阵：目前只有 `win11-intel` 与 `debian-13-nvidia-gtx1660` 两行有真实
-  硬件结果；其余仍是 descriptor。
-- 真实崩溃 dump 采集；crashmon 目前只有单元测试与 Windows 启动自测。
-- Windows 代码签名、安装包/更新/回滚。
+- 完整 15 行 Windows/Linux 驱动矩阵：目前只有 `win11-intel` 与
+  `debian-13-nvidia-gtx1660` 两行有真实硬件结果；其余仍是 descriptor。
+- 真实崩溃已采集 Windows minidump 并生成 crashmon bundle，但尚未用
+  `crashmon run` 监督真实崩溃、未符号化，也没有 Linux core。
+- Windows 代码签名、Linux GPG 签名、跨版本升级、自动回滚。
 - macOS 已不在交付范围；本文中的 macOS runner 记录仅作历史，不再作为验收项。
 
 Windows 本地 `ctest -L goo` 已真实执行（7 pass、1 skip），不再列为未验证；详见

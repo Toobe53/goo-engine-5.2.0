@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-24T18:05:54Z",
+  "generated_at": "2026-11-24T18:58:20Z",
   "project": {
     "name": "Goo Engine",
     "version": "5.2.1",
     "channel": "production"
   },
   "source": {
-    "commit": "7f76f1ef",
-    "commit_short": "7f76f1ef",
+    "commit": "a2639291",
+    "commit_short": "a2639291",
     "branch": "production/5.2"
   },
   "build": {
-    "id": "local-20261125",
-    "timestamp": "2026-11-24T18:05:54Z",
+    "id": "local-20261125c",
+    "timestamp": "2026-11-24T18:58:20Z",
     "host": "sb",
     "platform": "Windows-11-10.0.26200-SP0",
     "arch": "AMD64",
@@ -31,6 +31,11 @@
       "sha256": "bf3790719df9926bcaf5364a17053a1fa31c6ce36975181ddd2c58836f2c5a60"
     },
     {
+      "path": "goo-engine-5.2.1-windows-x64-setup.exe",
+      "size": 193345800,
+      "sha256": "36d7eaaa2d9fe70ce1eb499876a91b5c25742a6147b5914af075b9fe27783d98"
+    },
+    {
       "path": "goo-engine-5.2.1-windows-x64.zip",
       "size": 273726768,
       "sha256": "8fea6e94b39aefd37f82f3f193771cf182f94106be8d109eaf0229621ffb93ec"
@@ -39,7 +44,7 @@
   "checksums": {
     "algorithm": "sha256",
     "file": "SHA256SUMS",
-    "count": 2
+    "count": 3
   },
   "dependencies": [
     {

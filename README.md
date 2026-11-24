@@ -81,15 +81,17 @@ and release-engineering scaffolding. It is intentionally honest about evidence:
   EEVEE 64x64 and shadow-ID renders, and `ctest -L goo` 8 tests (7 pass, 1 skip);
   Debian 13 + GTX 1660 local release build (`7450/7450` targets), the same runtime
   checks and Goo tests; a real 4/4 driver-matrix pass on each of those two hosts;
-  a real Windows minidump preserved and hashed by `crashmon`; and a real
+  a real Windows minidump preserved and hashed by `crashmon`; a real
   Windows/Linux release bundle whose `SHA256SUMS` and `release-manifest.json`
-  pass `verify_release.py`.
+  pass `verify_release.py`; and a Windows per-user installer with a real
+  install/uninstall cycle plus archive-based update and rollback.
 - **Not yet verified:** the remaining 13 Windows/Linux driver-matrix rows, Windows
-  code signing, Linux GPG signing, installer/update/rollback, or crash-dump
-  symbolization. macOS is out of scope by request.
+  code signing, Linux GPG signing, cross-version upgrade/automatic rollback, or
+  crash-dump symbolization. macOS is out of scope by request.
 - Exact runs, test counts and remaining gaps:
   [Windows evidence](docs/production/evidence-windows-local.md),
   [Linux evidence](docs/production/evidence-linux-local.md),
+  [installer evidence](docs/production/evidence-windows-installer.md),
   [crash evidence](docs/production/evidence/crashmon-windows-real/README.md) and
   [CI evidence](docs/production/evidence.md).
 
