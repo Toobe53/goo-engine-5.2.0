@@ -44,13 +44,16 @@ struct ShadowAtlasAddress {
   bool is_valid;
 };
 
-/* Any entry point function using this should also use `[[texture_atomic]]`. */
+/* Any entry point function using this should also use `[[texture_atomic]]`.
+ *
+ * Shadow-ID receiver diagnostics are intentionally not a member here: a storage-buffer
+ * reference would make the compile-time pipeline descriptors (which use designated
+ * initializers for `shadow_random`) non-aggregate. Caster-side diagnostics remain in
+ * `SurfShadow`. */
 struct ShadowRenderData {
   [[sampler(SHADOW_ATLAS_TEX_SLOT)]] usampler2DArrayAtomic shadow_atlas_tx;
   [[sampler(SHADOW_ATLAS_ID_TEX_SLOT)]] usampler2DArrayAtomic shadow_atlas_id_tx;
   [[sampler(SHADOW_TILEMAPS_TEX_SLOT)]] usampler2D shadow_tilemaps_tx;
-  [[storage(SHADOW_ID_DIAGNOSTIC_BUF_SLOT, read_write)]]
-  ShadowIdDiagnosticData &shadow_id_diagnostic;
 
   [[compilation_constant]] bool shadow_random;
 
@@ -112,15 +115,6 @@ struct ShadowRenderData {
     }
 
     uint caster_id = read_caster_id(address);
-    if (uni.uniform_buf.shadow.use_shadow_id_diagnostics) {
-      atomicCompSwap(shadow_id_diagnostic.first_receiver_id, 0xFFFFFFFFu, id_filter.receiver_id);
-      if (caster_id == 0xFFFFFFFFu) {
-        atomicAdd(shadow_id_diagnostic.sentinel_reads, 1u);
-      }
-      else {
-        atomicAdd(shadow_id_diagnostic.valid_id_reads, 1u);
-      }
-    }
 
     bool filtered;
     if (caster_id == 0xFFFFFFFFu) {
@@ -134,14 +128,6 @@ struct ShadowRenderData {
       filtered = caster_id != id_filter.receiver_id;
     }
 
-    if (filtered && uni.uniform_buf.shadow.use_shadow_id_diagnostics) {
-      if (id_filter.mode == ShadowIdMode::IgnoreSelf) {
-        atomicAdd(shadow_id_diagnostic.ignore_self_hits, 1u);
-      }
-      else {
-        atomicAdd(shadow_id_diagnostic.only_self_hits, 1u);
-      }
-    }
     return filtered;
   }
 
