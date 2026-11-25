@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "kind": "self-signed-demo",
+  "production_trusted": false,
+  "timestamped": false,
+  "unsigned_setup": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\release-staging\\goo-engine-5.2.1-windows-x64-setup.exe",
+  "unsigned_sha256": "36d7eaaa2d9fe70ce1eb499876a91b5c25742a6147b5914af075b9fe27783d98",
+  "signed_setup": "C:\\Users\\zbq\\Documents\\deepseek-harness\\default-workspace\\goo-engine-5.2.0\\_work\\signing-demo\\goo-engine-5.2.1-windows-x64-setup-selfsigned.exe",
+  "signed_sha256": "da9c900ca5581c402cc22c23ec4090b618cddf6fa9d19780706f92ea5fc8dc7e",
+  "signed_size": 193347224,
+  "certificate_subject": "CN=Goo Engine Test Signing",
+  "certificate_sha1": "507F39C2F4D9F58AE9B10D099A08DCD09F134922",
+  "certificate_not_after": "2026-12-02T09:33:41.0000000+08:00",
+  "signtool_verify_exit": 1,
+  "authenticode_status": "UnknownError",
+  "authenticode_message": "已处理证书链，但是在不受信任提供程序信任的根证书中终止。",
+  "signer_subject": "CN=Goo Engine Test Signing",
+  "notes": "Self-signed demo only; root is not trusted. If verify exit is 1 and message mentions an untrusted root, that is expected."
+}

@@ -1,0 +1,29 @@
+
+
+Verifying: C:\Users\zbq\Documents\deepseek-harness\default-workspace\goo-engine-5.2.0\_work\signing-demo\goo-engine-5.2.1-windows-x64-setup-selfsigned.exe
+
+
+Signature Index: 0 (Primary Signature)
+Hash of file (sha256): D6AF5FFA13D5AA7760B26B80463F5375DC4FD55217C00FE19F44A83D21D6CBAA
+
+Signing Certificate Chain:
+    Issued to: Goo Engine Test Signing
+
+    Issued by: Goo Engine Test Signing
+
+    Expires:   Wed Dec 02 09:33:41 2026
+
+    SHA1 hash: 507F39C2F4D9F58AE9B10D099A08DCD09F134922
+
+
+File is not timestamped.
+
+
+Number of signatures successfully Verified: 0
+
+Number of warnings: 0
+
+Number of errors: 1
+
+SignTool Error: A certificate chain processed, but terminated in a root
+	certificate which is not trusted by the trust provider.

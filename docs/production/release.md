@@ -2,7 +2,7 @@
 
 本文档描述 Goo Engine 5.2 生产分支的发布打包、校验和签名流程。目标是：**默认安全、可重复、哈希覆盖最终字节**。
 
-> 状态（2026-11）：Windows/Linux 真实构建产物已跑通 `build_release.py --apply` → `SHA256SUMS` → `release-manifest.json` → `verify_release.py`（PASS，仅 unsigned 占位 warning）。Windows zip 与 Linux tar 都做了两次独立重建且 SHA-256 相同；Linux tar 使用 `--sort=name`、固定 `--mtime`、`--owner=0 --group=0 --numeric-owner` 与 `gzip -n`。**仍未持有项目控制的 Windows 代码签名证书或 Linux 发布 GPG 密钥；`sign_linux.sh` 已用临时测试密钥在 Debian 13 上完成 detached-sign + verify 实测，但正式 5.2.1 包仍 unsigned/unsigned-placeholder；macOS 不在本次 5.2.1 发布范围。** 签名/公证命令必须由持有密钥的发布负责人在真实环境复核。
+> 状态（2026-11）：Windows/Linux 真实构建产物已跑通 `build_release.py --apply` → `SHA256SUMS` → `release-manifest.json` → `verify_release.py`（PASS，仅 unsigned 占位 warning）。Windows zip 与 Linux tar 都做了两次独立重建且 SHA-256 相同；Linux tar 使用 `--sort=name`、固定 `--mtime`、`--owner=0 --group=0 --numeric-owner` 与 `gzip -n`。**仍未持有项目控制的 Windows 代码签名证书或 Linux 发布 GPG 密钥；`sign_linux.sh` 已用临时测试密钥在 Debian 13 上完成 detached-sign + verify 实测，Windows 已完成仅用于证明签名流程的自签名 Authenticode 演示，但自签名根不被信任，正式 5.2.1 包仍 unsigned/unsigned-placeholder；macOS 不在本次 5.2.1 发布范围。** 签名/公证命令必须由持有密钥的发布负责人在真实环境复核。
 
 ## 1. 原则
 
@@ -252,6 +252,18 @@ pwsh -File tools/release/sign_windows.ps1 -ArtifactsDir dist\5.2.0 -Execute
 
 注意：`signtool` 需要 Windows SDK；脚本不会自动安装。证书密码用环境变量传递，CI 中应使用 secret，不要写进命令行历史。
 
+### 5.0 自签名演示（非生产信任）
+
+用于验证 PowerShell/`signtool` 的签名与验签流程，不代表可发布签名：
+
+```powershell
+pwsh -NoProfile -File tools/release/sign_windows_selfsigned_demo.ps1 `
+  -SetupPath _work/release-staging/goo-engine-5.2.1-windows-x64-setup.exe `
+  -OutputDir _work/signing-demo
+```
+
+脚本只在 `Cert:\CurrentUser\My` 创建 7 天有效的自签名代码签名证书，签一份 setup 副本，记录 `signtool verify` 结果，然后删除 PFX 和证书；**不写入 Root/TrustedPublisher**。`signtool verify /pa /all /v` 会因根证书不受信任而退出 `1`，这是预期结果。证据见 [`evidence/windows-signing-selfsigned/README.md`](evidence/windows-signing-selfsigned/README.md)。该自签名副本不进入 `dist/`，正式 5.2.1 仍是 unsigned。
+
 ## 5.1 Linux GPG 签名 `sign_linux.sh`
 
 Linux 包不做代码签名；发布方对 `SHA256SUMS` 生成 detached ASCII-armored GPG 签名，用户用已发布指纹校验 `SHA256SUMS`，再校验归档。脚本默认 **dry-run**，`--execute` 才签名并立即 `gpg --verify`。
@@ -382,12 +394,12 @@ python tools/ci/local_gate.py --release-dir dist/goo-engine-5.2.1 --with-ctest -
 
 ## 10. 已知未验证项（诚实清单）
 
-- 未持有真实 Windows 代码签名证书，未执行 `sign_windows.ps1 -Execute`；已修复 dry-run 中 `$candidates[0]` 把单元素字符串索引成 `"C"` 的真实缺陷，并用真实 setup 复测得到完整 `signtool.exe` 路径、退出 `0`。本机 `signtool.exe` 位于 Windows SDK 10.0.26100.0。自签名证书测试在交互式根证书导入处阻塞，已终止并清理临时证书，未留下受信任测试根。
+- 未持有真实 Windows 代码签名证书，未执行 `sign_windows.ps1 -Execute`；已修复 dry-run 中 `$candidates[0]` 把单元素字符串索引成 `"C"` 的真实缺陷，并用真实 setup 复测得到完整 `signtool.exe` 路径、退出 `0`。本机 `signtool.exe` 位于 Windows SDK 10.0.26100.0。已用临时自签名证书完成 setup 副本的 `signtool sign /fd SHA256` 演示：签名存在、`Get-AuthenticodeSignature` 识别 signer，但因自签名根不受信任而 `signtool verify` 退出 `1`、状态 `UnknownError`；PFX/证书已删除，未写入 Root/TrustedPublisher。证据见 [`evidence/windows-signing-selfsigned/README.md`](evidence/windows-signing-selfsigned/README.md)。
 - 未在 macOS 上执行 `sign_macos.sh`；仅在 Windows 的 Git Bash 下做了 `bash -n` 语法检查与 dry-run，`--execute` 因非 macOS 正确退出 `2`。codesign/notarytool/stapler 的真实调用未验证。
-- 已用真实 Windows/Linux 5.2.1 产物生成并校验 bundle；仍未用真实**已签名**产物验证签名路径。
-- 未验证 `--check-signatures` 对真实已签二进制的结果（本机有 `signtool.exe`，但无项目证书/已签样本）。
+- 已用真实 Windows/Linux 5.2.1 产物生成并校验 bundle；Windows 自签名副本只证明签名写入/解析路径，未用受信任证书验证签名；正式 bundle 仍未签名。
+- 未验证 `--check-signatures` 对受信任已签二进制的结果（本机有 `signtool.exe`，但无项目证书/已签样本）。
 - Linux tar 与 Windows zip 都已做两次独立重建同 SHA 验证；Linux 第二次重建在远端完成。
-- 未在真实 Windows 已签名二进制上验证签名路径；安装包/更新/回滚已做**未签名、同版本**实测，跨版本升级与失败自动恢复未验证。
+- 未在受信任证书签名的 Windows 二进制上验证签名路径；自签名副本只覆盖签名写入/解析。安装包/更新/回滚已做**未签名、同版本**实测，跨版本升级与失败自动恢复未验证。
 - `driver-matrix.yml.example` 未在 GitHub Actions 实际启用。
 
 ## 11. 责任人（占位）

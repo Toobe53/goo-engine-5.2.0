@@ -86,9 +86,10 @@ and release-engineering scaffolding. It is intentionally honest about evidence:
   Windows/Linux release bundle whose `SHA256SUMS` and `release-manifest.json`
   pass `verify_release.py`; a Windows per-user installer with a real
   install/uninstall cycle plus archive-based update and rollback; a 7-stage
-  local gate (7 passed, 0 failed); and signing-tool checks (Linux GPG
+  local gate (7 passed, 0 failed); signing-tool checks (Linux GPG
   detach-sign/verify with a temporary key, Windows `sign_windows.ps1` dry-run
-  resolved the full `signtool.exe` path and exited 0).
+  resolved the full `signtool.exe` path and exited 0); and a self-signed
+  Authenticode demo that produced a parseable but untrusted setup signature.
 - **Not yet verified:** the remaining 13 Windows/Linux driver-matrix rows,
   formal release signing with project-controlled Windows/Linux keys (the
   5.2.1 bundle is still unsigned), cross-version upgrade/automatic rollback,
