@@ -234,12 +234,13 @@ build_probe.py --text (this Windows host, no cmake/ninja/git)             -> exi
 build_probe.py --repo-root <non-checkout>                                 -> exit 2 (expected)
 ```
 
-Hosted run `45384517223` (head `9d4dce4e`) built Linux x64 and Windows x64
-release artifacts successfully. That run is the source of the Windows runtime
-evidence, not a release gate. In addition, during development the workflow
-was parsed with PyYAML installed into a throwaway temporary directory (never
-into the repo) and the built-in parser's output for every step, trigger and
-matrix entry matched PyYAML exactly. Five mutations of the workflow (missing
-matrix entry, failing build allow to pass, removed label gate, log upload
-changed from `always()`, invalid indentation) were all rejected by
-`validate_workflow.py` with non-zero exit codes.
+Hosted run `45471947059` (head `c5f63259`) is the current green result after
+removing macOS: both `linux-x64` and `windows-x64` jobs completed successfully
+and uploaded their build/log artifacts. Historical run `45384517223` (head
+`9d4dce4e`) is the source of the earlier Windows runtime evidence. The workflow
+was also parsed with PyYAML installed into a throwaway temporary directory
+(never into the repo) during development; that check predates the macOS removal.
+Five mutations of the workflow (missing matrix entry, failing build allow to
+pass, removed label gate, log upload changed from `always()`, invalid
+indentation) were all rejected by `validate_workflow.py` with non-zero exit
+codes.

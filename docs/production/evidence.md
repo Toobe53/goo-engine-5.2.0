@@ -1,4 +1,4 @@
-# 生产验证证据：CI 历史（2026-11-24）
+# 生产验证证据：CI 历史（2026-11-25）
 
 本文件记录 `production/5.2` 在提交 `9d4dce4e` 上通过 GitHub CI 和 Windows CI 产物取得的
 历史证据。macOS 已按用户要求移出当前交付范围；Windows/Linux 的本地构建、干净安装、
@@ -6,6 +6,21 @@ CTest 和真实驱动矩阵见
 [evidence-windows-local.md](evidence-windows-local.md) 与
 [evidence-linux-local.md](evidence-linux-local.md)。本文件只记录已执行的内容；没有执行的
 项目在最后一节明确列出。
+
+## Windows/Linux CI green（2026-11-25）
+
+macOS job 移除后，workflow 只保留 Windows x64 与 Linux x64。GitHub Actions run
+`45471947059`（commit `c5f63259`，`production-build`）整体 **completed/success**：
+
+| Job | 结果 | Artifact | Size |
+| --- | --- | --- | --- |
+| `linux-x64` | success | `goo-engine-linux-x64` | 616,539,557 B |
+| `windows-x64` | success | `goo-engine-windows-x64` | 314,187,666 B |
+
+日志 artifact：`logs-linux-x64` 181,256 B、`logs-windows-x64` 167,223 B。对应静态
+workflow 校验为 `60 checks passed, 0 failed`（`tools/ci/validate_workflow.py`）。
+托管 runner 仍没有 GPU，因此这次绿只证明 Windows/Linux 源码构建与上传链路，不证明
+EEVEE/驱动回归；GPU 覆盖仍以本地两行驱动矩阵和自托管矩阵为准。
 
 ## 构建产物
 
